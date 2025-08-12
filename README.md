@@ -77,4 +77,4 @@ We welcome contributions! Please see our contributing guidelines (coming soon) f
 
 ## License
 
-Copyright &copy; 2025 Maximilian Giraldo
+MIT License
