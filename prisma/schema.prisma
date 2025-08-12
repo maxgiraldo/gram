@@ -1,0 +1,533 @@
+// Gram - Interactive Grammar Learning Platform Database Schema
+// Based on Mastery Learning Principles
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ===== USER MANAGEMENT =====
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User profile and preferences
+  profile     UserProfile?
+  preferences UserPreferences?
+
+  // Learning data relationships
+  progress    LearnerProgress[]
+  assessmentAttempts AssessmentAttempt[]
+  exerciseAttempts   ExerciseAttempt[]
+  analytics   UserAnalytics[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id          String @id @default(cuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Profile information
+  age         Int?
+  gradeLevel  String?
+  learningGoals String?
+  timezone    String?
+  
+  // Learning preferences
+  preferredDifficulty String? // "beginner", "intermediate", "advanced"
+  learningStyle       String? // "visual", "auditory", "kinesthetic", "mixed"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+model UserPreferences {
+  id          String @id @default(cuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // UI preferences
+  theme       String @default("light") // "light", "dark", "auto"
+  language    String @default("en")
+  
+  // Learning preferences
+  dailyGoalMinutes    Int @default(30)
+  enableNotifications Boolean @default(true)
+  enableSounds        Boolean @default(true)
+  showHints           Boolean @default(true)
+  
+  // Accessibility preferences
+  fontSize            String @default("medium") // "small", "medium", "large"
+  highContrast        Boolean @default(false)
+  reducedMotion       Boolean @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+// ===== CONTENT MANAGEMENT =====
+
+model Unit {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  orderIndex  Int
+  isPublished Boolean @default(false)
+  
+  // Mastery requirements
+  masteryThreshold Float @default(0.9) // 90% for unit completion
+  
+  // Prerequisites
+  prerequisiteUnits String? // JSON array of unit IDs
+  
+  lessons     Lesson[]
+  objectives  LearningObjective[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([orderIndex])
+  @@map("units")
+}
+
+model Lesson {
+  id          String @id @default(cuid())
+  unitId      String
+  unit        Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String
+  content     String // Markdown content
+  orderIndex  Int
+  isPublished Boolean @default(false)
+  
+  // Mastery requirements
+  masteryThreshold Float @default(0.8) // 80% for lesson progression
+  estimatedMinutes Int @default(30)
+  
+  // Content metadata
+  difficulty  String @default("beginner") // "beginner", "intermediate", "advanced"
+  tags        String? // JSON array of topic tags
+  
+  objectives  LearningObjective[]
+  exercises   Exercise[]
+  assessments Assessment[]
+  progress    LearnerProgress[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([unitId, orderIndex])
+  @@map("lessons")
+}
+
+model LearningObjective {
+  id          String @id @default(cuid())
+  unitId      String?
+  unit        Unit?  @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  lessonId    String?
+  lesson      Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String
+  category    String // "knowledge", "comprehension", "application", "analysis", "synthesis", "evaluation"
+  
+  // Mastery tracking
+  masteryThreshold Float @default(0.8)
+  
+  // Assessment relationships
+  assessmentQuestions AssessmentQuestion[]
+  exerciseQuestions   ExerciseQuestion[]
+  progress           ObjectiveProgress[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("learning_objectives")
+}
+
+// ===== EXERCISE SYSTEM =====
+
+model Exercise {
+  id          String @id @default(cuid())
+  lessonId    String
+  lesson      Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  type        String // "practice", "reinforcement", "challenge", "enrichment"
+  orderIndex  Int
+  
+  // Exercise configuration
+  timeLimit   Int? // in seconds
+  maxAttempts Int @default(3)
+  difficulty  String @default("medium") // "easy", "medium", "hard"
+  
+  questions   ExerciseQuestion[]
+  attempts    ExerciseAttempt[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([lessonId, orderIndex])
+  @@map("exercises")
+}
+
+model ExerciseQuestion {
+  id          String @id @default(cuid())
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  objectiveId String?
+  objective   LearningObjective? @relation(fields: [objectiveId], references: [id])
+  
+  questionText String
+  type        String // "multiple_choice", "fill_in_blank", "drag_and_drop", "sentence_builder"
+  orderIndex  Int
+  
+  // Question configuration
+  points      Int @default(1)
+  timeLimit   Int? // in seconds
+  
+  // Question content (JSON)
+  questionData String // Stores type-specific question data as JSON
+  correctAnswer String // Stores correct answer(s) as JSON
+  hints       String? // JSON array of progressive hints
+  
+  // Feedback content
+  correctFeedback   String?
+  incorrectFeedback String?
+  
+  responses   ExerciseResponse[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([exerciseId, orderIndex])
+  @@map("exercise_questions")
+}
+
+model ExerciseAttempt {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  
+  // Attempt metadata
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  timeSpent   Int? // in seconds
+  
+  // Scoring
+  totalQuestions    Int
+  correctAnswers    Int
+  scorePercentage   Float
+  isPassed          Boolean @default(false)
+  
+  responses   ExerciseResponse[]
+  
+  @@map("exercise_attempts")
+}
+
+model ExerciseResponse {
+  id          String @id @default(cuid())
+  attemptId   String
+  attempt     ExerciseAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    ExerciseQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  // Response data
+  response    String // User's answer as JSON
+  isCorrect   Boolean
+  points      Int
+  timeSpent   Int? // in seconds
+  hintsUsed   Int @default(0)
+  
+  // Feedback given
+  feedback    String?
+  
+  createdAt   DateTime @default(now())
+
+  @@map("exercise_responses")
+}
+
+// ===== ASSESSMENT SYSTEM =====
+
+model Assessment {
+  id          String @id @default(cuid())
+  lessonId    String?
+  lesson      Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  type        String // "diagnostic", "formative", "summative", "retention_check"
+  
+  // Assessment configuration
+  timeLimit   Int? // in seconds
+  maxAttempts Int @default(2)
+  masteryThreshold Float @default(0.8)
+  
+  // Scheduling for retention checks
+  scheduledDelay Int? // days after lesson completion
+  
+  questions   AssessmentQuestion[]
+  attempts    AssessmentAttempt[]
+  
+  isPublished Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("assessments")
+}
+
+model AssessmentQuestion {
+  id          String @id @default(cuid())
+  assessmentId String
+  assessment  Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  objectiveId String?
+  objective   LearningObjective? @relation(fields: [objectiveId], references: [id])
+  
+  questionText String
+  type        String // "multiple_choice", "fill_in_blank", "drag_and_drop", "sentence_builder", "essay"
+  orderIndex  Int
+  
+  // Question configuration
+  points      Int @default(1)
+  difficulty  String @default("medium") // "easy", "medium", "hard"
+  
+  // Question content (JSON)
+  questionData String // Stores type-specific question data
+  correctAnswer String // Stores correct answer(s) as JSON
+  
+  // Distractors and feedback
+  distractors String? // JSON array of wrong answers for analysis
+  feedback    String?
+  
+  responses   AssessmentResponse[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([assessmentId, orderIndex])
+  @@map("assessment_questions")
+}
+
+model AssessmentAttempt {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessmentId String
+  assessment  Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  // Attempt metadata
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  timeSpent   Int? // in seconds
+  
+  // Scoring
+  totalQuestions    Int
+  correctAnswers    Int
+  scorePercentage   Float
+  achievedMastery   Boolean @default(false)
+  
+  responses   AssessmentResponse[]
+  
+  @@map("assessment_attempts")
+}
+
+model AssessmentResponse {
+  id          String @id @default(cuid())
+  attemptId   String
+  attempt     AssessmentAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  // Response data
+  response    String // User's answer as JSON
+  isCorrect   Boolean
+  points      Int
+  timeSpent   Int? // in seconds
+  
+  // Analysis data
+  errorType   String? // Type of error for analytics
+  confidence  Float? // User's confidence level (0-1)
+  
+  createdAt   DateTime @default(now())
+
+  @@map("assessment_responses")
+}
+
+// ===== PROGRESS TRACKING =====
+
+model LearnerProgress {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  // Progress status
+  status      String @default("not_started") // "not_started", "in_progress", "completed", "mastered"
+  
+  // Mastery tracking
+  currentScore      Float @default(0.0)
+  bestScore         Float @default(0.0)
+  masteryAchieved   Boolean @default(false)
+  masteryDate       DateTime?
+  
+  // Engagement metrics
+  totalTimeSpent    Int @default(0) // in seconds
+  sessionsCount     Int @default(0)
+  lastAccessedAt    DateTime @default(now())
+  
+  // Corrective instruction tracking
+  needsRemediation  Boolean @default(false)
+  remediationPath   String? // JSON array of recommended activities
+  
+  // Enrichment tracking
+  eligibleForEnrichment Boolean @default(false)
+  enrichmentActivities  String? // JSON array of completed enrichment activity IDs
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("learner_progress")
+}
+
+model ObjectiveProgress {
+  id          String @id @default(cuid())
+  userId      String
+  objectiveId String
+  objective   LearningObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  
+  // Mastery tracking
+  currentScore      Float @default(0.0)
+  bestScore         Float @default(0.0)
+  masteryAchieved   Boolean @default(false)
+  masteryDate       DateTime?
+  
+  // Attempt tracking
+  totalAttempts     Int @default(0)
+  correctAttempts   Int @default(0)
+  
+  lastAttemptAt     DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, objectiveId])
+  @@map("objective_progress")
+}
+
+// ===== ANALYTICS & INSIGHTS =====
+
+model UserAnalytics {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Time-based analytics
+  date        DateTime @default(now())
+  
+  // Daily metrics
+  timeSpent   Int @default(0) // in seconds
+  lessonsStarted    Int @default(0)
+  lessonsCompleted  Int @default(0)
+  exercisesCompleted Int @default(0)
+  assessmentsTaken   Int @default(0)
+  
+  // Performance metrics
+  averageScore      Float @default(0.0)
+  masteryRate       Float @default(0.0) // percentage of objectives mastered
+  retentionRate     Float @default(0.0) // retention check performance
+  
+  // Learning patterns
+  preferredTimeOfDay String? // "morning", "afternoon", "evening"
+  avgSessionLength   Int @default(0) // in seconds
+  streakDays         Int @default(0)
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, date])
+  @@map("user_analytics")
+}
+
+model LearningInsight {
+  id          String @id @default(cuid())
+  userId      String
+  
+  // Insight metadata
+  type        String // "strength", "weakness", "recommendation", "achievement"
+  category    String // "grammar_topic", "learning_pattern", "performance_trend"
+  
+  // Insight content
+  title       String
+  description String
+  confidence  Float // AI confidence in this insight (0-1)
+  
+  // Action recommendations
+  recommendations String? // JSON array of suggested actions
+  priority        String @default("medium") // "low", "medium", "high"
+  
+  // Lifecycle
+  isViewed    Boolean @default(false)
+  isDismissed Boolean @default(false)
+  expiresAt   DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("learning_insights")
+}
+
+// ===== SYSTEM TABLES =====
+
+model SystemConfig {
+  id          String @id @default(cuid())
+  key         String @unique
+  value       String
+  description String?
+  
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+model ContentRevision {
+  id          String @id @default(cuid())
+  entityType  String // "lesson", "exercise", "assessment"
+  entityId    String
+  
+  // Revision data
+  version     Int
+  changes     String // JSON describing changes
+  changedBy   String // User ID or system
+  
+  // Approval workflow
+  status      String @default("draft") // "draft", "review", "approved", "published"
+  reviewedBy  String?
+  approvedAt  DateTime?
+  
+  createdAt   DateTime @default(now())
+
+  @@map("content_revisions")
+}
+
+// ===== INDEXES FOR PERFORMANCE =====
+// Note: Some databases might need explicit index creation
+// These are logical indexes that should be created during migration
