@@ -1,69 +1,80 @@
-# React + TypeScript + Vite
+# Gram - Interactive Grammar Learning Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Vision
 
-Currently, two official plugins are available:
+Gram aims to revolutionize grammar education by providing an interactive, engaging, and personalized learning experience. We believe that mastering grammar should be accessible, enjoyable, and tailored to individual learning styles and pace.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Project Goals
 
-## Expanding the ESLint configuration
+- **Democratize Grammar Education**: Make high-quality grammar instruction available to learners worldwide, regardless of their background or resources
+- **Personalized Learning Paths**: Create adaptive learning experiences that adjust to each student's proficiency level and learning speed
+- **Engagement Through Interactivity**: Replace traditional rote memorization with interactive exercises, real-world examples, and gamified challenges
+- **Comprehensive Coverage**: Build a complete curriculum covering grammar fundamentals to advanced concepts across multiple languages
+- **Data-Driven Improvement**: Use analytics to continuously improve content and identify common learning obstacles
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Features
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Core Learning Features
+- **Interactive Lessons**: Step-by-step grammar tutorials with inline practice exercises
+- **Real-Time Feedback**: Instant corrections and explanations for mistakes
+- **Progress Tracking**: Visual dashboards showing learning progress and mastery levels
+- **Adaptive Difficulty**: Exercises that automatically adjust based on performance
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Content & Curriculum
+- **Structured Courses**: Organized modules from beginner to advanced levels
+- **Grammar Rules Database**: Comprehensive reference guide with examples
+- **Practice Exercises**: Thousands of exercises covering all grammar topics
+- **Real-World Context**: Examples from literature, news, and everyday communication
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Engagement & Gamification
+- **Achievement System**: Badges and rewards for completing lessons and milestones
+- **Daily Challenges**: Quick daily exercises to maintain consistent practice
+- **Streak Tracking**: Motivation through consecutive day counters
+- **Leaderboards**: Optional competitive elements for motivated learners
+
+### Learning Tools
+- **Grammar Checker**: AI-powered tool to check and explain grammar in user-submitted text
+- **Writing Assistant**: Guided writing exercises with grammar suggestions
+- **Vocabulary Integration**: Connect grammar lessons with vocabulary building
+- **Multi-Language Support**: Initially English, with plans for other languages
+
+### Accessibility & Customization
+- **Multiple Learning Modes**: Visual, auditory, and kinesthetic learning options
+- **Offline Mode**: Download lessons for learning without internet connection
+- **Accessibility Features**: Screen reader support, adjustable fonts, and high contrast modes
+- **Custom Study Plans**: Create personalized learning schedules and goals
+
+## Technical Stack
+
+- **Frontend**: React + TypeScript + Vite
+- **Styling**: Modern CSS with responsive design
+- **State Management**: TBD based on complexity
+- **Testing**: Comprehensive unit and integration tests
+- **Performance**: Optimized for fast load times and smooth interactions
+
+## Getting Started
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm run dev
+
+# Build for production
+pnpm run build
+
+# Run linter
+pnpm run lint
+
+# Preview production build
+pnpm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Contributing
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+We welcome contributions! Please see our contributing guidelines (coming soon) for more information.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## License
+
+Copyright &copy; 2025 Maximilian Giraldo
