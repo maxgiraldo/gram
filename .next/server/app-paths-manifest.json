@@ -1,1 +1,18 @@
-{}
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/assessments/[id]/attempts/route": "app/api/assessments/[id]/attempts/route.js",
+  "/api/assessments/[id]/route": "app/api/assessments/[id]/route.js",
+  "/api/assessments/route": "app/api/assessments/route.js",
+  "/api/exercises/[id]/attempts/route": "app/api/exercises/[id]/attempts/route.js",
+  "/api/exercises/[id]/questions/route": "app/api/exercises/[id]/questions/route.js",
+  "/api/exercises/[id]/route": "app/api/exercises/[id]/route.js",
+  "/api/exercises/analytics/route": "app/api/exercises/analytics/route.js",
+  "/api/exercises/attempts/[attemptId]/responses/route": "app/api/exercises/attempts/[attemptId]/responses/route.js",
+  "/api/exercises/attempts/[attemptId]/route": "app/api/exercises/attempts/[attemptId]/route.js",
+  "/api/exercises/route": "app/api/exercises/route.js",
+  "/api/progress/objectives/route": "app/api/progress/objectives/route.js",
+  "/api/progress/route": "app/api/progress/route.js",
+  "/lessons/page": "app/lessons/page.js",
+  "/page": "app/page.js",
+  "/progress/page": "app/progress/page.js"
+}

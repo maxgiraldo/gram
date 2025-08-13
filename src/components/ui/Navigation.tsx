@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Button } from './Button';
+"use client";
+
+import React, { useState } from "react";
+import { Button } from "./Button";
 
 export interface NavigationProps {
   onSidebarToggle?: () => void;
@@ -19,15 +21,15 @@ export interface NavItem {
 export const Navigation: React.FC<NavigationProps> = ({
   onSidebarToggle,
   showSidebarToggle = false,
-  className = '',
+  className = "",
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems: NavItem[] = [
-    { id: 'home', label: 'Home', href: '/' },
-    { id: 'lessons', label: 'Lessons', href: '/lessons' },
-    { id: 'practice', label: 'Practice', href: '/practice' },
-    { id: 'progress', label: 'Progress', href: '/progress' },
+    { id: "home", label: "Home", href: "/" },
+    { id: "lessons", label: "Lessons", href: "/lessons" },
+    { id: "practice", label: "Practice", href: "/practice" },
+    { id: "progress", label: "Progress", href: "/progress" },
   ];
 
   const toggleMobileMenu = () => {
@@ -35,7 +37,9 @@ export const Navigation: React.FC<NavigationProps> = ({
   };
 
   return (
-    <nav className={`bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40 ${className}`}>
+    <nav
+      className={`bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40 ${className}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -48,8 +52,18 @@ export const Navigation: React.FC<NavigationProps> = ({
                 className="mr-4 hidden lg:flex"
                 aria-label="Toggle sidebar"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </Button>
             )}
@@ -70,9 +84,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onClick={item.onClick}
                   className={`
                     inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200
-                    ${item.active 
-                      ? 'border-blue-500 text-gray-900' 
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ${
+                      item.active
+                        ? "border-blue-500 text-gray-900"
+                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                     }
                   `}
                 >
@@ -103,11 +118,26 @@ export const Navigation: React.FC<NavigationProps> = ({
                 onClick={toggleMobileMenu}
                 aria-label="Toggle mobile menu"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   )}
                 </svg>
               </Button>
@@ -117,7 +147,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       </div>
 
       {/* Mobile menu */}
-      <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+      <div className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`}>
         <div className="pt-2 pb-3 space-y-1 bg-gray-50 border-t border-gray-200">
           {/* Sidebar toggle for mobile */}
           {showSidebarToggle && (
@@ -125,8 +155,18 @@ export const Navigation: React.FC<NavigationProps> = ({
               onClick={onSidebarToggle}
               className="flex items-center w-full px-4 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
               Menu
             </button>
@@ -140,9 +180,10 @@ export const Navigation: React.FC<NavigationProps> = ({
               onClick={item.onClick}
               className={`
                 block px-4 py-2 text-base font-medium transition-colors duration-200
-                ${item.active 
-                  ? 'text-blue-600 bg-blue-50 border-r-4 border-blue-600' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                ${
+                  item.active
+                    ? "text-blue-600 bg-blue-50 border-r-4 border-blue-600"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }
               `}
             >

@@ -59,4 +59,4 @@ It's important that agents don't step on each other's toes, so make sure they're
 
 Read CONTEXT.md to understand how agents will be working.
 
-Keep track of task progress byin tasks/ and provide me with summary of updates.
+Keep track of task progress by in tasks/ and provide me with summary of updates.
