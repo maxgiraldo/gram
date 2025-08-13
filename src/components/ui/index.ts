@@ -5,6 +5,12 @@ export type { ButtonProps } from './Button';
 export { Card, CardHeader, CardBody, CardFooter } from './Card';
 export type { CardProps, CardHeaderProps, CardBodyProps, CardFooterProps } from './Card';
 
+export { Badge } from './Badge';
+export type { BadgeProps } from './Badge';
+
+export { ProgressBar } from './ProgressBar';
+export type { ProgressBarProps } from './ProgressBar';
+
 export { Modal } from './Modal';
 export type { ModalProps } from './Modal';
 

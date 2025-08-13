@@ -46,11 +46,38 @@ Gram aims to revolutionize grammar education by providing an interactive, engagi
 
 ## Technical Stack
 
-- **Frontend**: React + TypeScript + Vite
-- **Styling**: Modern CSS with responsive design
-- **State Management**: TBD based on complexity
-- **Testing**: Comprehensive unit and integration tests
-- **Performance**: Optimized for fast load times and smooth interactions
+### Core Technologies
+- **Framework**: Next.js 15.4.6 with App Router
+- **Language**: TypeScript 5.8
+- **Package Manager**: pnpm
+- **Database**: Prisma ORM with SQLite (development) / PostgreSQL (production)
+
+### Frontend
+- **UI Components**: React 19.1 with Server Components
+- **Styling**: Tailwind CSS v4.1 with CSS-first configuration
+- **Design System**: Linear-style UI with Catalyst UI Kit components
+- **Animations**: Framer Motion
+- **Icons**: Heroicons
+
+### Backend & Data
+- **API Routes**: Next.js API routes with TypeScript
+- **Database ORM**: Prisma 6.14
+- **Validation**: Zod schemas
+- **Authentication**: TBD
+
+### Testing & Quality
+- **Test Framework**: Vitest with React Testing Library
+- **Linting**: ESLint with TypeScript support
+- **Type Checking**: Strict TypeScript configuration
+
+### Key Features Implemented
+- ✅ Mastery-based learning system with adaptive algorithms
+- ✅ Real-time feedback engine with intelligent hint generation
+- ✅ Multiple exercise types (Multiple Choice, Fill-in-the-Blank, Drag & Drop, Sentence Builder)
+- ✅ Comprehensive assessment system with progress tracking
+- ✅ Content management with structured lessons and objectives
+- ✅ Accessibility-first design with screen reader support
+- ✅ Modern, responsive UI with Tailwind CSS v4
 
 ## Getting Started
 
@@ -58,18 +85,54 @@ Gram aims to revolutionize grammar education by providing an interactive, engagi
 # Install dependencies
 pnpm install
 
+# Set up database
+pnpm prisma generate
+pnpm prisma db push
+pnpm run db:seed
+
 # Start development server
 pnpm run dev
 
 # Build for production
 pnpm run build
 
-# Run linter
+# Run tests
+pnpm test
+
+# Run tests with coverage
+pnpm test:coverage
+
+# Type checking
+pnpm run typecheck
+
+# Linting
 pnpm run lint
 
-# Preview production build
-pnpm run preview
+# Database commands
+pnpm run db:reset  # Reset and reseed database
 ```
+
+## Project Structure
+
+```
+gram/
+├── src/
+│   ├── app/              # Next.js App Router pages and API routes
+│   ├── components/       # React components
+│   │   ├── ui/          # Catalyst UI Kit components
+│   │   ├── exercises/   # Exercise type components
+│   │   ├── assessment/  # Assessment components
+│   │   └── content/     # Content display components
+│   ├── lib/             # Business logic and utilities
+│   │   ├── assessment/  # Mastery calculation and progress evaluation
+│   │   ├── exercises/   # Exercise generation and feedback
+│   │   ├── db/         # Database queries and providers
+│   │   └── validation/ # Zod schemas
+│   ├── hooks/          # Custom React hooks
+│   └── types/          # TypeScript type definitions
+├── prisma/             # Database schema and migrations
+├── content/            # Lesson content markdown files
+└── tasks/              # Development task tracking
 
 ## Contributing
 

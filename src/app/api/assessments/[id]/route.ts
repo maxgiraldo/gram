@@ -19,8 +19,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
     const { searchParams } = new URL(request.url);
     const includeQuestions = searchParams.get('includeQuestions') === 'true';
     const includeAttempts = searchParams.get('includeAttempts') === 'true';
@@ -69,8 +69,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
     const body = await request.json();
 
     // Validate type if provided
@@ -181,8 +181,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
     await deleteAssessment(id);
 
     return NextResponse.json({

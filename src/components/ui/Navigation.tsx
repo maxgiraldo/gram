@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "./Button";
 
 export interface NavigationProps {
   onSidebarToggle?: () => void;
@@ -38,18 +37,16 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <nav
-      className={`bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40 ${className}`}
+      className={`bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-40 ${className}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             {/* Sidebar Toggle (Desktop) */}
             {showSidebarToggle && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={onSidebarToggle}
-                className="mr-4 hidden lg:flex"
+                className="mr-4 hidden lg:flex p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Toggle sidebar"
               >
                 <svg
@@ -65,13 +62,13 @@ export const Navigation: React.FC<NavigationProps> = ({
                     d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
-              </Button>
+              </button>
             )}
 
             {/* Logo */}
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-blue-600">Gram</h1>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Gram</h1>
               </div>
             </div>
 
@@ -101,21 +98,20 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
             {/* User Actions */}
-            <div className="hidden md:flex items-center space-x-4">
-              <Button variant="outline" size="sm">
+            <div className="hidden md:flex items-center space-x-3">
+              <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200">
                 Sign In
-              </Button>
-              <Button variant="primary" size="sm">
+              </button>
+              <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg hover:from-blue-700 hover:to-blue-600 shadow-sm hover:shadow-md transition-all duration-200">
                 Sign Up
-              </Button>
+              </button>
             </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={toggleMobileMenu}
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Toggle mobile menu"
               >
                 <svg
@@ -140,7 +136,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     />
                   )}
                 </svg>
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -197,12 +193,12 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Mobile user actions */}
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="px-4 space-y-2">
-              <Button variant="outline" className="w-full">
+              <button className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200">
                 Sign In
-              </Button>
-              <Button variant="primary" className="w-full">
+              </button>
+              <button className="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg hover:from-blue-700 hover:to-blue-600 shadow-sm hover:shadow-md transition-all duration-200">
                 Sign Up
-              </Button>
+              </button>
             </div>
           </div>
         </div>

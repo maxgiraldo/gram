@@ -1,16 +1,11 @@
 /**
  * Feedback Engine
- * 
+ *
  * Real-time feedback generation system with adaptive hint delivery,
  * progressive hint revealing, and intelligent feedback generation.
  */
 
-import type { 
-  ExerciseQuestion, 
-  QuestionType,
-  Difficulty 
-} from '../../types/content';
-import type { ValidationResult } from '../../components/exercises/types';
+import type { ExerciseQuestion } from "../../types/content";
 
 // ===== TYPES AND INTERFACES =====
 
@@ -29,7 +24,7 @@ export interface UserLearningProfile {
   userId: string;
   strengthAreas: string[];
   weaknessAreas: string[];
-  preferredHintStyle: 'detailed' | 'minimal' | 'visual';
+  preferredHintStyle: "detailed" | "minimal" | "visual";
   averageResponseTime: number;
   successRate: number;
   commonMistakes: ErrorPattern[];
@@ -43,7 +38,7 @@ export interface ErrorPattern {
 }
 
 export interface GeneratedFeedback {
-  type: 'correct' | 'incorrect' | 'partial' | 'hint' | 'explanation';
+  type: "correct" | "incorrect" | "partial" | "hint" | "explanation";
   title: string;
   message: string;
   details?: string;
@@ -51,7 +46,7 @@ export interface GeneratedFeedback {
   nextSteps?: string;
   visualAid?: string;
   relatedConcepts?: string[];
-  severity?: 'minor' | 'moderate' | 'major';
+  severity?: "minor" | "moderate" | "major";
   confidence?: number;
 }
 
@@ -65,7 +60,7 @@ export interface HintSequence {
 export interface HintData {
   level: number;
   content: string;
-  type: 'text' | 'visual' | 'example' | 'structural';
+  type: "text" | "visual" | "example" | "structural";
   revealPercentage: number;
   prerequisiteHints?: number[];
   category?: string;
@@ -78,7 +73,7 @@ export interface FeedbackOptions {
   enableRelatedConcepts?: boolean;
   maxFeedbackLength?: number;
   language?: string;
-  tone?: 'formal' | 'casual' | 'encouraging';
+  tone?: "formal" | "casual" | "encouraging";
 }
 
 // ===== FEEDBACK GENERATION =====
@@ -93,35 +88,39 @@ export function generateFeedback(
   const {
     enableAdaptive = true,
     enableEncouragement = true,
-    tone = 'encouraging'
+    tone = "encouraging",
   } = options;
 
   // Analyze the answer
   const analysis = analyzeAnswer(context);
-  
+
   // Determine feedback type
   const feedbackType = determineFeedbackType(analysis);
-  
+
   // Generate base feedback
   const baseFeedback = generateBaseFeedback(feedbackType, context, analysis);
-  
+
   // Enhance with adaptive elements if enabled
-  const enhancedFeedback = enableAdaptive 
+  const enhancedFeedback = enableAdaptive
     ? enhanceWithAdaptiveElements(baseFeedback, context, analysis)
     : baseFeedback;
-  
+
   // Add encouragement if enabled
-  if (enableEncouragement && feedbackType !== 'correct') {
+  if (enableEncouragement && feedbackType !== "correct") {
     enhancedFeedback.encouragement = generateEncouragement(
       context.attemptNumber,
       analysis.errorSeverity,
       tone
     );
   }
-  
+
   // Add next steps
-  enhancedFeedback.nextSteps = generateNextSteps(feedbackType, analysis, context);
-  
+  enhancedFeedback.nextSteps = generateNextSteps(
+    feedbackType,
+    analysis,
+    context
+  );
+
   return enhancedFeedback;
 }
 
@@ -130,35 +129,47 @@ export function generateFeedback(
  */
 function analyzeAnswer(context: FeedbackContext): AnswerAnalysis {
   const { question, userAnswer, correctAnswer } = context;
-  
+
   const analysis: AnswerAnalysis = {
     isCorrect: false,
     partialCredit: 0,
     errorType: null,
-    errorSeverity: 'minor',
+    errorSeverity: "minor",
     commonMistake: false,
     specificIssues: [],
-    strengths: []
+    strengths: [],
   };
 
   // Type-specific analysis
   switch (question.type) {
-    case 'multiple_choice':
-      return analyzeMultipleChoice(userAnswer as string, correctAnswer as string, analysis);
-    
-    case 'fill_in_blank':
-      return analyzeFillInBlank(userAnswer as string[], correctAnswer as string[], analysis);
-    
-    case 'drag_and_drop':
+    case "multiple_choice":
+      return analyzeMultipleChoice(
+        userAnswer as string,
+        correctAnswer as string,
+        analysis
+      );
+
+    case "fill_in_blank":
+      return analyzeFillInBlank(
+        userAnswer as string[],
+        correctAnswer as string[],
+        analysis
+      );
+
+    case "drag_and_drop":
       return analyzeDragAndDrop(
         userAnswer as Record<string, string>,
         correctAnswer as Record<string, string>,
         analysis
       );
-    
-    case 'sentence_builder':
-      return analyzeSentenceBuilder(userAnswer as string[], correctAnswer as string[], analysis);
-    
+
+    case "sentence_builder":
+      return analyzeSentenceBuilder(
+        userAnswer as string[],
+        correctAnswer as string[],
+        analysis
+      );
+
     default:
       return analysis;
   }
@@ -168,7 +179,7 @@ interface AnswerAnalysis {
   isCorrect: boolean;
   partialCredit: number;
   errorType: string | null;
-  errorSeverity: 'minor' | 'moderate' | 'major';
+  errorSeverity: "minor" | "moderate" | "major";
   commonMistake: boolean;
   specificIssues: string[];
   strengths: string[];
@@ -183,17 +194,17 @@ function analyzeMultipleChoice(
   analysis: AnswerAnalysis
 ): AnswerAnalysis {
   analysis.isCorrect = userAnswer === correctAnswer;
-  
+
   if (!analysis.isCorrect) {
     // Check for common distractors
     const commonDistracters = getCommonDistracters(correctAnswer);
     if (commonDistracters.includes(userAnswer)) {
       analysis.commonMistake = true;
-      analysis.errorType = 'common_misconception';
-      analysis.specificIssues.push('This is a common misconception');
+      analysis.errorType = "common_misconception";
+      analysis.specificIssues.push("This is a common misconception");
     }
   }
-  
+
   return analysis;
 }
 
@@ -206,11 +217,11 @@ function analyzeFillInBlank(
   analysis: AnswerAnalysis
 ): AnswerAnalysis {
   let correctCount = 0;
-  
+
   userAnswers.forEach((answer, index) => {
     const normalized = normalizeText(answer);
     const correct = normalizeText(correctAnswers[index]);
-    
+
     if (normalized === correct) {
       correctCount++;
       analysis.strengths.push(`Blank ${index + 1} is correct`);
@@ -218,28 +229,30 @@ function analyzeFillInBlank(
       // Check for spelling mistakes
       if (isSpellingMistake(normalized, correct)) {
         analysis.specificIssues.push(`Blank ${index + 1}: Spelling error`);
-        analysis.errorType = 'spelling';
-        analysis.errorSeverity = 'minor';
+        analysis.errorType = "spelling";
+        analysis.errorSeverity = "minor";
         correctCount += 0.5; // Partial credit for spelling
       }
       // Check for grammatical variations
       else if (isGrammaticalVariation(normalized, correct)) {
-        analysis.specificIssues.push(`Blank ${index + 1}: Grammatical variation`);
-        analysis.errorType = 'grammar';
+        analysis.specificIssues.push(
+          `Blank ${index + 1}: Grammatical variation`
+        );
+        analysis.errorType = "grammar";
         correctCount += 0.7; // Partial credit for grammar
       }
       // Completely wrong
       else {
         analysis.specificIssues.push(`Blank ${index + 1}: Incorrect`);
-        analysis.errorType = 'incorrect';
-        analysis.errorSeverity = 'major';
+        analysis.errorType = "incorrect";
+        analysis.errorSeverity = "major";
       }
     }
   });
-  
+
   analysis.partialCredit = correctCount / correctAnswers.length;
   analysis.isCorrect = analysis.partialCredit === 1;
-  
+
   return analysis;
 }
 
@@ -253,8 +266,8 @@ function analyzeDragAndDrop(
 ): AnswerAnalysis {
   const items = Object.keys(correctMapping);
   let correctCount = 0;
-  
-  items.forEach(item => {
+
+  items.forEach((item) => {
     if (userMapping[item] === correctMapping[item]) {
       correctCount++;
       analysis.strengths.push(`"${item}" correctly placed`);
@@ -264,15 +277,16 @@ function analyzeDragAndDrop(
       );
     }
   });
-  
+
   analysis.partialCredit = correctCount / items.length;
   analysis.isCorrect = analysis.partialCredit === 1;
-  
+
   if (!analysis.isCorrect) {
-    analysis.errorType = 'misplacement';
-    analysis.errorSeverity = analysis.partialCredit > 0.5 ? 'minor' : 'moderate';
+    analysis.errorType = "misplacement";
+    analysis.errorSeverity =
+      analysis.partialCredit > 0.5 ? "minor" : "moderate";
   }
-  
+
   return analysis;
 }
 
@@ -284,42 +298,46 @@ function analyzeSentenceBuilder(
   correctOrder: string[],
   analysis: AnswerAnalysis
 ): AnswerAnalysis {
-  const userSentence = userOrder.join(' ');
-  const correctSentence = correctOrder.join(' ');
-  
+  const userSentence = userOrder.join(" ");
+  const correctSentence = correctOrder.join(" ");
+
   if (userSentence === correctSentence) {
     analysis.isCorrect = true;
     return analysis;
   }
-  
+
   // Check for transposition errors
   const transpositions = findTranspositions(userOrder, correctOrder);
   if (transpositions.length > 0) {
-    analysis.errorType = 'word_order';
-    analysis.errorSeverity = transpositions.length <= 2 ? 'minor' : 'moderate';
-    analysis.specificIssues.push(`Word order issues: ${transpositions.length} transpositions`);
-    analysis.partialCredit = 1 - (transpositions.length / correctOrder.length);
+    analysis.errorType = "word_order";
+    analysis.errorSeverity = transpositions.length <= 2 ? "minor" : "moderate";
+    analysis.specificIssues.push(
+      `Word order issues: ${transpositions.length} transpositions`
+    );
+    analysis.partialCredit = 1 - transpositions.length / correctOrder.length;
   }
-  
+
   // Check for grammatical validity even if different
   if (isGrammaticallyValid(userSentence)) {
-    analysis.strengths.push('Sentence is grammatically valid');
+    analysis.strengths.push("Sentence is grammatically valid");
     analysis.partialCredit = Math.max(analysis.partialCredit, 0.7);
   }
-  
+
   return analysis;
 }
 
 /**
  * Determine feedback type based on analysis
  */
-function determineFeedbackType(analysis: AnswerAnalysis): GeneratedFeedback['type'] {
+function determineFeedbackType(
+  analysis: AnswerAnalysis
+): GeneratedFeedback["type"] {
   if (analysis.isCorrect) {
-    return 'correct';
+    return "correct";
   } else if (analysis.partialCredit > 0.5) {
-    return 'partial';
+    return "partial";
   } else {
-    return 'incorrect';
+    return "incorrect";
   }
 }
 
@@ -327,41 +345,46 @@ function determineFeedbackType(analysis: AnswerAnalysis): GeneratedFeedback['typ
  * Generate base feedback
  */
 function generateBaseFeedback(
-  type: GeneratedFeedback['type'],
+  type: GeneratedFeedback["type"],
   context: FeedbackContext,
   analysis: AnswerAnalysis
 ): GeneratedFeedback {
   const feedback: GeneratedFeedback = {
     type,
-    title: '',
-    message: '',
-    confidence: 1.0
+    title: "",
+    message: "",
+    confidence: 1.0,
   };
 
   switch (type) {
-    case 'correct':
-      feedback.title = getCorrectTitle(context.hintsUsed, context.attemptNumber);
-      feedback.message = 'Well done! You got it right.';
+    case "correct":
+      feedback.title = getCorrectTitle(
+        context.hintsUsed,
+        context.attemptNumber
+      );
+      feedback.message = "Well done! You got it right.";
       if (analysis.strengths.length > 0) {
-        feedback.details = `Strengths: ${analysis.strengths.join(', ')}`;
+        feedback.details = `Strengths: ${analysis.strengths.join(", ")}`;
       }
       break;
-    
-    case 'partial':
-      feedback.title = 'Almost there!';
-      feedback.message = `You got ${Math.round(analysis.partialCredit * 100)}% correct.`;
+
+    case "partial":
+      feedback.title = "Almost there!";
+      feedback.message = `You got ${Math.round(
+        analysis.partialCredit * 100
+      )}% correct.`;
       feedback.details = formatPartialFeedback(analysis);
       break;
-    
-    case 'incorrect':
-      feedback.title = 'Not quite right';
+
+    case "incorrect":
+      feedback.title = "Not quite right";
       feedback.message = getIncorrectMessage(analysis, context.attemptNumber);
       if (analysis.specificIssues.length > 0) {
-        feedback.details = `Issues: ${analysis.specificIssues.join('; ')}`;
+        feedback.details = `Issues: ${analysis.specificIssues.join("; ")}`;
       }
       break;
   }
-  
+
   return feedback;
 }
 
@@ -375,9 +398,12 @@ function enhanceWithAdaptiveElements(
 ): GeneratedFeedback {
   // Add related concepts based on error type
   if (analysis.errorType) {
-    feedback.relatedConcepts = getRelatedConcepts(analysis.errorType, context.question);
+    feedback.relatedConcepts = getRelatedConcepts(
+      analysis.errorType,
+      context.question
+    );
   }
-  
+
   // Adjust message based on user profile if available
   if (context.userProfile) {
     feedback.message = personalizeMessage(
@@ -386,12 +412,12 @@ function enhanceWithAdaptiveElements(
       analysis
     );
   }
-  
+
   // Add visual aids for complex errors
-  if (analysis.errorSeverity === 'major' || context.attemptNumber > 2) {
+  if (analysis.errorSeverity === "major" || context.attemptNumber > 2) {
     feedback.visualAid = generateVisualAid(context.question, analysis);
   }
-  
+
   return feedback;
 }
 
@@ -405,12 +431,12 @@ export function generateHintSequence(
   options: FeedbackOptions = {}
 ): HintSequence {
   const hints = generateHintsForQuestion(question);
-  
+
   return {
     hints,
     currentIndex: -1,
     maxHints: Math.min(hints.length, 3),
-    adaptiveMode: options.enableAdaptive ?? true
+    adaptiveMode: options.enableAdaptive ?? true,
   };
 }
 
@@ -424,14 +450,14 @@ export function getNextHint(
   if (sequence.currentIndex >= sequence.maxHints - 1) {
     return null;
   }
-  
+
   sequence.currentIndex++;
-  
+
   if (sequence.adaptiveMode && context) {
     // Select hint based on user's specific struggle
     return selectAdaptiveHint(sequence.hints, context, sequence.currentIndex);
   }
-  
+
   return sequence.hints[sequence.currentIndex];
 }
 
@@ -440,24 +466,24 @@ export function getNextHint(
  */
 function generateHintsForQuestion(question: ExerciseQuestion): HintData[] {
   const hints: HintData[] = [];
-  
+
   // Add predefined hints if available
   if (question.hints && question.hints.length > 0) {
     question.hints.forEach((hint, index) => {
       hints.push({
         level: index,
         content: hint,
-        type: 'text',
+        type: "text",
         revealPercentage: (index + 1) * 33,
-        category: 'provided'
+        category: "provided",
       });
     });
   }
-  
+
   // Generate additional hints based on question type
   const generatedHints = generateTypeSpecificHints(question);
   hints.push(...generatedHints);
-  
+
   // Sort by reveal percentage
   return hints.sort((a, b) => a.revealPercentage - b.revealPercentage);
 }
@@ -467,63 +493,64 @@ function generateHintsForQuestion(question: ExerciseQuestion): HintData[] {
  */
 function generateTypeSpecificHints(question: ExerciseQuestion): HintData[] {
   const hints: HintData[] = [];
-  
+
   switch (question.type) {
-    case 'multiple_choice':
+    case "multiple_choice":
       hints.push({
         level: 1,
-        content: 'Consider eliminating obviously incorrect options first.',
-        type: 'text',
+        content: "Consider eliminating obviously incorrect options first.",
+        type: "text",
         revealPercentage: 20,
-        category: 'strategy'
+        category: "strategy",
       });
       break;
-    
-    case 'fill_in_blank':
+
+    case "fill_in_blank":
       hints.push({
         level: 1,
-        content: 'Look at the context around each blank for clues.',
-        type: 'text',
+        content: "Look at the context around each blank for clues.",
+        type: "text",
         revealPercentage: 20,
-        category: 'strategy'
+        category: "strategy",
       });
       hints.push({
         level: 2,
-        content: 'Check the grammatical form needed (verb tense, singular/plural, etc.).',
-        type: 'text',
+        content:
+          "Check the grammatical form needed (verb tense, singular/plural, etc.).",
+        type: "text",
         revealPercentage: 40,
-        category: 'grammar'
+        category: "grammar",
       });
       break;
-    
-    case 'sentence_builder':
+
+    case "sentence_builder":
       hints.push({
         level: 1,
-        content: 'Start by identifying the subject and main verb.',
-        type: 'structural',
+        content: "Start by identifying the subject and main verb.",
+        type: "structural",
         revealPercentage: 25,
-        category: 'structure'
+        category: "structure",
       });
       hints.push({
         level: 2,
-        content: 'Think about the typical word order in English sentences.',
-        type: 'text',
+        content: "Think about the typical word order in English sentences.",
+        type: "text",
         revealPercentage: 50,
-        category: 'grammar'
+        category: "grammar",
       });
       break;
-    
-    case 'drag_and_drop':
+
+    case "drag_and_drop":
       hints.push({
         level: 1,
-        content: 'Group similar items together first.',
-        type: 'text',
+        content: "Group similar items together first.",
+        type: "text",
         revealPercentage: 20,
-        category: 'strategy'
+        category: "strategy",
       });
       break;
   }
-  
+
   return hints;
 }
 
@@ -536,21 +563,21 @@ function selectAdaptiveHint(
   level: number
 ): HintData {
   // Filter hints appropriate for current level
-  const levelHints = availableHints.filter(h => h.level <= level);
-  
+  const levelHints = availableHints.filter((h) => h.level <= level);
+
   // If user has specific error pattern, prioritize relevant hints
   if (context.userProfile?.commonMistakes.length > 0) {
-    const relevantHints = levelHints.filter(hint => {
+    const relevantHints = levelHints.filter((hint) => {
       return context.userProfile!.commonMistakes.some(
-        mistake => hint.category === mistake.type
+        (mistake) => hint.category === mistake.type
       );
     });
-    
+
     if (relevantHints.length > 0) {
       return relevantHints[0];
     }
   }
-  
+
   // Return the most appropriate hint for the level
   return levelHints[levelHints.length - 1] || availableHints[0];
 }
@@ -562,20 +589,23 @@ function selectAdaptiveHint(
  */
 function getCorrectTitle(hintsUsed: number, attemptNumber: number): string {
   if (hintsUsed === 0 && attemptNumber === 1) {
-    return 'Perfect!';
+    return "Perfect!";
   } else if (hintsUsed === 0) {
-    return 'Excellent!';
+    return "Excellent!";
   } else if (hintsUsed === 1) {
-    return 'Good job!';
+    return "Good job!";
   } else {
-    return 'Correct!';
+    return "Correct!";
   }
 }
 
 /**
  * Get incorrect feedback message
  */
-function getIncorrectMessage(analysis: AnswerAnalysis, attemptNumber: number): string {
+function getIncorrectMessage(
+  analysis: AnswerAnalysis,
+  attemptNumber: number
+): string {
   if (analysis.commonMistake) {
     return "This is a common mistake. Let's think about it differently.";
   } else if (attemptNumber === 1) {
@@ -592,16 +622,16 @@ function getIncorrectMessage(analysis: AnswerAnalysis, attemptNumber: number): s
  */
 function formatPartialFeedback(analysis: AnswerAnalysis): string {
   const parts: string[] = [];
-  
+
   if (analysis.strengths.length > 0) {
-    parts.push(`Correct: ${analysis.strengths.join(', ')}`);
+    parts.push(`Correct: ${analysis.strengths.join(", ")}`);
   }
-  
+
   if (analysis.specificIssues.length > 0) {
-    parts.push(`To improve: ${analysis.specificIssues.join(', ')}`);
+    parts.push(`To improve: ${analysis.specificIssues.join(", ")}`);
   }
-  
-  return parts.join(' | ');
+
+  return parts.join(" | ");
 }
 
 /**
@@ -614,25 +644,25 @@ function generateEncouragement(
 ): string {
   const encouragements = {
     formal: [
-      'Please review the material and try again.',
-      'Consider the question from a different perspective.',
-      'Take your time to think through the answer.'
+      "Please review the material and try again.",
+      "Consider the question from a different perspective.",
+      "Take your time to think through the answer.",
     ],
     casual: [
-      'No worries! Give it another shot.',
-      'You\'ve got this! Try again.',
-      'Almost there, keep going!'
+      "No worries! Give it another shot.",
+      "You've got this! Try again.",
+      "Almost there, keep going!",
     ],
     encouraging: [
-      'Great effort! You\'re getting closer.',
-      'Keep it up! Learning takes practice.',
-      'You\'re doing great! Each attempt helps you learn.'
-    ]
+      "Great effort! You're getting closer.",
+      "Keep it up! Learning takes practice.",
+      "You're doing great! Each attempt helps you learn.",
+    ],
   };
-  
+
   const messages = encouragements[tone] || encouragements.encouraging;
   const index = Math.min(attemptNumber - 1, messages.length - 1);
-  
+
   return messages[index];
 }
 
@@ -640,41 +670,44 @@ function generateEncouragement(
  * Generate next steps suggestion
  */
 function generateNextSteps(
-  type: GeneratedFeedback['type'],
+  type: GeneratedFeedback["type"],
   analysis: AnswerAnalysis,
   context: FeedbackContext
 ): string {
-  if (type === 'correct') {
-    return 'Move on to the next question.';
+  if (type === "correct") {
+    return "Move on to the next question.";
   }
-  
+
   if (context.attemptNumber >= 3 && context.hintsUsed === 0) {
-    return 'Consider using a hint for guidance.';
+    return "Consider using a hint for guidance.";
   }
-  
-  if (analysis.errorType === 'spelling') {
-    return 'Check your spelling carefully.';
+
+  if (analysis.errorType === "spelling") {
+    return "Check your spelling carefully.";
   }
-  
-  if (analysis.errorType === 'grammar') {
-    return 'Review the grammatical rules for this type of question.';
+
+  if (analysis.errorType === "grammar") {
+    return "Review the grammatical rules for this type of question.";
   }
-  
-  return 'Review your answer and try again.';
+
+  return "Review your answer and try again.";
 }
 
 /**
  * Get related concepts based on error type
  */
-function getRelatedConcepts(errorType: string, question: ExerciseQuestion): string[] {
+function getRelatedConcepts(
+  errorType: string,
+  question: ExerciseQuestion
+): string[] {
   const conceptMap: Record<string, string[]> = {
-    'spelling': ['Letter patterns', 'Common misspellings'],
-    'grammar': ['Verb conjugation', 'Subject-verb agreement', 'Tense usage'],
-    'word_order': ['Sentence structure', 'Word order rules'],
-    'vocabulary': ['Synonyms', 'Context clues', 'Word meanings'],
-    'common_misconception': ['Common errors', 'Similar concepts']
+    spelling: ["Letter patterns", "Common misspellings"],
+    grammar: ["Verb conjugation", "Subject-verb agreement", "Tense usage"],
+    word_order: ["Sentence structure", "Word order rules"],
+    vocabulary: ["Synonyms", "Context clues", "Word meanings"],
+    common_misconception: ["Common errors", "Similar concepts"],
   };
-  
+
   return conceptMap[errorType] || [];
 }
 
@@ -687,22 +720,28 @@ function personalizeMessage(
   analysis: AnswerAnalysis
 ): string {
   // Add personalization based on learning style
-  if (profile.preferredHintStyle === 'visual' && analysis.errorSeverity !== 'minor') {
-    message += ' Check the visual guide below.';
+  if (
+    profile.preferredHintStyle === "visual" &&
+    analysis.errorSeverity !== "minor"
+  ) {
+    message += " Check the visual guide below.";
   }
-  
+
   // Reference past performance if relevant
-  if (profile.commonMistakes.some(m => m.type === analysis.errorType)) {
-    message += ' This relates to a pattern we\'ve seen before.';
+  if (profile.commonMistakes.some((m) => m.type === analysis.errorType)) {
+    message += " This relates to a pattern we've seen before.";
   }
-  
+
   return message;
 }
 
 /**
  * Generate visual aid for complex errors
  */
-function generateVisualAid(question: ExerciseQuestion, analysis: AnswerAnalysis): string {
+function generateVisualAid(
+  question: ExerciseQuestion,
+  analysis: AnswerAnalysis
+): string {
   // This would generate or reference visual aids
   // For now, return a placeholder
   return `Visual aid for ${question.type} - ${analysis.errorType}`;
@@ -714,7 +753,10 @@ function generateVisualAid(question: ExerciseQuestion, analysis: AnswerAnalysis)
  * Normalize text for comparison
  */
 function normalizeText(text: string): string {
-  return text.toLowerCase().trim().replace(/[^\w\s]/g, '');
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s]/g, "");
 }
 
 /**
@@ -729,17 +771,74 @@ function isSpellingMistake(userAnswer: string, correctAnswer: string): boolean {
 /**
  * Check if it's a grammatical variation
  */
-function isGrammaticalVariation(userAnswer: string, correctAnswer: string): boolean {
-  // Check for common grammatical variations
+function isGrammaticalVariation(
+  userAnswer: string,
+  correctAnswer: string
+): boolean {
+  // Generate possible grammatical variations
   const variations = [
-    [correctAnswer, correctAnswer + 's'], // Plural
-    [correctAnswer, correctAnswer + 'ed'], // Past tense
-    [correctAnswer, correctAnswer + 'ing'], // Present continuous
+    // Plural forms
+    ...generatePluralVariations(correctAnswer),
+    // Verb forms
+    [correctAnswer, correctAnswer + "ed"], // Past tense
+    [correctAnswer, correctAnswer + "ing"], // Present continuous
+    [correctAnswer, correctAnswer + "s"], // Third person singular
   ];
-  
-  return variations.some(([a, b]) => 
-    userAnswer === a || userAnswer === b
-  );
+
+  return variations.some(([a, b]) => userAnswer === a || userAnswer === b);
+}
+
+/**
+ * Generate plural variations for a word
+ */
+function generatePluralVariations(word: string): [string, string][] {
+  const variations: [string, string][] = [];
+
+  // Simple plural (most common)
+  variations.push([word, word + "s"]);
+
+  // Words ending in -s, -x, -z, -ch, -sh add "es"
+  if (/[sxz]$|[cs]h$/.test(word)) {
+    variations.push([word, word + "es"]);
+  }
+
+  // Words ending in consonant + y → ies (e.g., city → cities)
+  if (/[bcdfghjklmnpqrstvwxz]y$/.test(word)) {
+    variations.push([word, word.slice(0, -1) + "ies"]);
+  }
+
+  // Words ending in -f or -fe → ves (e.g., leaf → leaves)
+  if (/fe?$/.test(word)) {
+    const base = word.replace(/fe?$/, "");
+    variations.push([word, base + "ves"]);
+  }
+
+  // Words ending in consonant + o → oes (e.g., hero → heroes)
+  if (/[bcdfghjklmnpqrstvwxz]o$/.test(word)) {
+    variations.push([word, word + "es"]);
+  }
+
+  // Common irregular plurals
+  const irregularPlurals: Record<string, string> = {
+    child: "children",
+    foot: "feet",
+    tooth: "teeth",
+    mouse: "mice",
+    man: "men",
+    woman: "women",
+    person: "people",
+    goose: "geese",
+    ox: "oxen",
+    matrix: "matrices",
+    index: "indices",
+    vertex: "vertices",
+  };
+
+  if (irregularPlurals[word]) {
+    variations.push([word, irregularPlurals[word]]);
+  }
+
+  return variations;
 }
 
 /**
@@ -754,9 +853,12 @@ function getCommonDistracters(correctAnswer: string): string[] {
 /**
  * Find transpositions in word order
  */
-function findTranspositions(userOrder: string[], correctOrder: string[]): number[] {
+function findTranspositions(
+  userOrder: string[],
+  correctOrder: string[]
+): number[] {
   const transpositions: number[] = [];
-  
+
   for (let i = 0; i < userOrder.length; i++) {
     if (userOrder[i] !== correctOrder[i]) {
       const correctIndex = correctOrder.indexOf(userOrder[i]);
@@ -765,7 +867,7 @@ function findTranspositions(userOrder: string[], correctOrder: string[]): number
       }
     }
   }
-  
+
   return transpositions;
 }
 
@@ -775,9 +877,14 @@ function findTranspositions(userOrder: string[], correctOrder: string[]): number
 function isGrammaticallyValid(sentence: string): boolean {
   // Simplified grammar check
   // In production, this would use NLP libraries
-  const hasSubject = /\b(I|you|he|she|it|we|they|[A-Z][a-z]+)\b/i.test(sentence);
-  const hasVerb = /\b(is|are|was|were|have|has|had|do|does|did|[a-z]+ed|[a-z]+ing)\b/i.test(sentence);
-  
+  const hasSubject = /\b(I|you|he|she|it|we|they|[A-Z][a-z]+)\b/i.test(
+    sentence
+  );
+  const hasVerb =
+    /\b(is|are|was|were|have|has|had|do|does|did|[a-z]+ed|[a-z]+ing)\b/i.test(
+      sentence
+    );
+
   return hasSubject && hasVerb;
 }
 
@@ -786,15 +893,15 @@ function isGrammaticallyValid(sentence: string): boolean {
  */
 function levenshteinDistance(str1: string, str2: string): number {
   const matrix: number[][] = [];
-  
+
   for (let i = 0; i <= str2.length; i++) {
     matrix[i] = [i];
   }
-  
+
   for (let j = 0; j <= str1.length; j++) {
     matrix[0][j] = j;
   }
-  
+
   for (let i = 1; i <= str2.length; i++) {
     for (let j = 1; j <= str1.length; j++) {
       if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
@@ -808,21 +915,6 @@ function levenshteinDistance(str1: string, str2: string): number {
       }
     }
   }
-  
+
   return matrix[str2.length][str1.length];
 }
-
-// ===== EXPORTS =====
-
-export {
-  generateFeedback,
-  generateHintSequence,
-  getNextHint,
-  type FeedbackContext,
-  type GeneratedFeedback,
-  type HintSequence,
-  type HintData,
-  type FeedbackOptions,
-  type UserLearningProfile,
-  type ErrorPattern
-};

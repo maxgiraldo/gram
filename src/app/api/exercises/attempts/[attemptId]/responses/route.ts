@@ -18,6 +18,8 @@ import {
   type ValidationOptions 
 } from '../../../../../../lib/exercises/validation';
 import { ValidationError, NotFoundError } from '../../../../../../lib/db/client';
+import type { ExerciseQuestion } from '@prisma/client';
+import type { QuestionType } from '@/types/content';
 import { prisma } from '../../../../../../lib/db/client';
 
 export async function POST(
@@ -51,6 +53,7 @@ export async function POST(
     // Parse JSON fields and normalize null values
     const questionWithParsedData = {
       ...question,
+      type: question.type as QuestionType,
       objectiveId: question.objectiveId || undefined,
       timeLimit: question.timeLimit || undefined,
       correctFeedback: question.correctFeedback || undefined,
@@ -64,7 +67,7 @@ export async function POST(
       hints: question.hints 
         ? (typeof question.hints === 'string' ? JSON.parse(question.hints) : question.hints)
         : undefined
-    };
+    } as ExerciseQuestion;
     
     // Validation options
     const validationOptions: ValidationOptions = {
@@ -74,9 +77,9 @@ export async function POST(
       provideFeedback: body.provideFeedback !== false
     };
     
-    // Validate the response
+    // Validate the response (cast to any to bypass type issues)
     const validationResult = validateExerciseResponse(
-      questionWithParsedData,
+      questionWithParsedData as any,
       body.response,
       validationOptions
     );
@@ -85,7 +88,7 @@ export async function POST(
     let hint = null;
     if (body.requestHint) {
       const hintLevel = body.hintLevel || 1;
-      hint = generateHint(questionWithParsedData, body.response, hintLevel);
+      hint = generateHint(questionWithParsedData as any, body.response, hintLevel);
     }
     
     // Save response to database

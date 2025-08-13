@@ -1,6 +1,6 @@
-import { Layout } from '@/components/ui/Layout';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Layout } from "@/components/ui/Layout";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -20,8 +20,8 @@ export default function Home() {
             Start Learning
           </h2>
           <p className="text-gray-600 mb-4">
-            Begin your grammar journey with interactive lessons designed to
-            make learning engaging and effective.
+            Begin your grammar journey with interactive lessons designed to make
+            learning engaging and effective.
           </p>
           <a href="/lessons">
             <Button variant="primary" size="lg">

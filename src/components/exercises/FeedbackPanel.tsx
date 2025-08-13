@@ -1,29 +1,29 @@
 /**
  * Feedback Panel Component
- * 
+ *
  * Real-time feedback display component with adaptive hints,
  * visual indicators, and progressive hint revealing.
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Button } from '../ui/Button';
-import { Card, CardBody } from '../ui/Card';
-import type { 
-  GeneratedFeedback, 
-  HintSequence, 
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Button } from "../ui/button";
+import { Card, CardBody } from "../ui/Card";
+import type {
+  GeneratedFeedback,
+  HintSequence,
   HintData,
   FeedbackContext,
-  FeedbackOptions 
-} from '../../lib/exercises/feedback-engine';
-import { 
-  generateFeedback, 
-  generateHintSequence, 
-  getNextHint 
-} from '../../lib/exercises/feedback-engine';
-import type { ExerciseQuestion } from '../../types/content';
-import type { ValidationResult } from './types';
+  FeedbackOptions,
+} from "../../lib/exercises/feedback-engine";
+import {
+  generateFeedback,
+  generateHintSequence,
+  getNextHint,
+} from "../../lib/exercises/feedback-engine";
+import type { ExerciseQuestion } from "../../types/content";
+import type { ValidationResult } from "./types";
 
 // ===== TYPES =====
 
@@ -42,7 +42,7 @@ export interface FeedbackPanelProps {
   hideDelay?: number;
   enableAdaptive?: boolean;
   enableAnimation?: boolean;
-  position?: 'inline' | 'floating' | 'sidebar';
+  position?: "inline" | "floating" | "sidebar";
   showHintButton?: boolean;
   maxHints?: number;
 }
@@ -71,12 +71,12 @@ export function FeedbackPanel({
   timeSpent = 0,
   onHintRequest,
   onFeedbackDismiss,
-  className = '',
+  className = "",
   autoHide = false,
   hideDelay = 5000,
   enableAdaptive = true,
   enableAnimation = true,
-  position = 'inline',
+  position = "inline",
   showHintButton = true,
   maxHints = 3,
 }: FeedbackPanelProps) {
@@ -97,13 +97,13 @@ export function FeedbackPanel({
     const options: FeedbackOptions = {
       enableAdaptive,
       enableEncouragement: true,
-      tone: 'encouraging',
+      tone: "encouraging",
     };
 
     const sequence = generateHintSequence(question, options);
     sequence.maxHints = Math.min(sequence.maxHints, maxHints);
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       hintSequence: sequence,
       hintsRevealed: 0,
@@ -130,12 +130,12 @@ export function FeedbackPanel({
       enableAdaptive,
       enableEncouragement: true,
       enableVisualAids: true,
-      tone: 'encouraging',
+      tone: "encouraging",
     };
 
     const feedback = generateFeedback(context, options);
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       currentFeedback: feedback,
       isVisible: true,
@@ -143,7 +143,7 @@ export function FeedbackPanel({
     }));
 
     // Auto-hide logic
-    if (autoHide && feedback.type === 'correct') {
+    if (autoHide && feedback.type === "correct") {
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
       }
@@ -172,8 +172,8 @@ export function FeedbackPanel({
 
     const context: FeedbackContext = {
       question,
-      userAnswer: userAnswer || '',
-      correctAnswer: correctAnswer || '',
+      userAnswer: userAnswer || "",
+      correctAnswer: correctAnswer || "",
       attemptNumber,
       hintsUsed: state.hintsRevealed,
       timeSpent,
@@ -182,7 +182,7 @@ export function FeedbackPanel({
     const nextHint = getNextHint(state.hintSequence, context);
 
     if (nextHint) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         currentHint: nextHint,
         hintsRevealed: prev.hintsRevealed + 1,
@@ -211,19 +211,22 @@ export function FeedbackPanel({
 
   // Handle dismiss
   const handleDismiss = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isAnimating: false,
     }));
 
-    setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        isVisible: false,
-        currentFeedback: null,
-      }));
-      onFeedbackDismiss?.();
-    }, enableAnimation ? 300 : 0);
+    setTimeout(
+      () => {
+        setState((prev) => ({
+          ...prev,
+          isVisible: false,
+          currentFeedback: null,
+        }));
+        onFeedbackDismiss?.();
+      },
+      enableAnimation ? 300 : 0
+    );
   }, [enableAnimation, onFeedbackDismiss]);
 
   // Cleanup timeout on unmount
@@ -242,46 +245,51 @@ export function FeedbackPanel({
 
   // Determine position classes
   const positionClasses = {
-    inline: '',
-    floating: 'fixed bottom-4 right-4 z-50 max-w-md',
-    sidebar: 'sticky top-4',
+    inline: "",
+    floating: "fixed bottom-4 right-4 z-50 max-w-md",
+    sidebar: "sticky top-4",
   };
 
   // Determine feedback type styling
-  const getFeedbackStyle = (type: GeneratedFeedback['type']) => {
+  const getFeedbackStyle = (type: GeneratedFeedback["type"]) => {
     switch (type) {
-      case 'correct':
-        return 'bg-green-50 border-green-200 text-green-800';
-      case 'incorrect':
-        return 'bg-red-50 border-red-200 text-red-800';
-      case 'partial':
-        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      case 'hint':
-        return 'bg-blue-50 border-blue-200 text-blue-800';
-      case 'explanation':
-        return 'bg-purple-50 border-purple-200 text-purple-800';
+      case "correct":
+        return "bg-green-50 border-green-200 text-green-800";
+      case "incorrect":
+        return "bg-red-50 border-red-200 text-red-800";
+      case "partial":
+        return "bg-yellow-50 border-yellow-200 text-yellow-800";
+      case "hint":
+        return "bg-blue-50 border-blue-200 text-blue-800";
+      case "explanation":
+        return "bg-purple-50 border-purple-200 text-purple-800";
       default:
-        return 'bg-gray-50 border-gray-200 text-gray-800';
+        return "bg-gray-50 border-gray-200 text-gray-800";
     }
   };
 
   // Render hint
   const renderHint = (hint: HintData) => {
     const hintIcons = {
-      text: '💡',
-      visual: '👁️',
-      example: '📝',
-      structural: '🏗️',
+      text: "💡",
+      visual: "👁️",
+      example: "📝",
+      structural: "🏗️",
     };
 
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-2xl" role="img" aria-label={`${hint.type} hint`}>
+          <span
+            className="text-2xl"
+            role="img"
+            aria-label={`${hint.type} hint`}
+          >
             {hintIcons[hint.type]}
           </span>
           <span className="font-semibold">
-            Hint {state.hintsRevealed} of {state.hintSequence?.maxHints || maxHints}
+            Hint {state.hintsRevealed} of{" "}
+            {state.hintSequence?.maxHints || maxHints}
           </span>
         </div>
         <p className="text-sm">{hint.content}</p>
@@ -375,8 +383,8 @@ export function FeedbackPanel({
       className={`
         feedback-panel
         ${positionClasses[position]}
-        ${state.isAnimating ? 'animate-slide-in' : ''}
-        ${!state.isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+        ${state.isAnimating ? "animate-slide-in" : ""}
+        ${!state.isVisible ? "opacity-0 pointer-events-none" : "opacity-100"}
         transition-all duration-300
         ${className}
       `}
@@ -384,44 +392,61 @@ export function FeedbackPanel({
       <Card
         className={`
           border-2
-          ${state.currentFeedback ? getFeedbackStyle(state.currentFeedback.type) : ''}
-          ${state.currentHint ? 'bg-blue-50 border-blue-200 text-blue-800' : ''}
+          ${
+            state.currentFeedback
+              ? getFeedbackStyle(state.currentFeedback.type)
+              : ""
+          }
+          ${state.currentHint ? "bg-blue-50 border-blue-200 text-blue-800" : ""}
         `}
       >
         <CardBody className="relative">
           {/* Close button for floating/sidebar positions */}
-          {(position === 'floating' || position === 'sidebar') && (
+          {(position === "floating" || position === "sidebar") && (
             <button
               onClick={handleDismiss}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
               aria-label="Dismiss feedback"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           )}
 
           {/* Content */}
           {state.currentHint && renderHint(state.currentHint)}
-          {state.currentFeedback && !state.currentHint && renderFeedback(state.currentFeedback)}
+          {state.currentFeedback &&
+            !state.currentHint &&
+            renderFeedback(state.currentFeedback)}
 
           {/* Hint button */}
-          {showHintButton && 
-           state.hintSequence && 
-           state.hintsRevealed < state.hintSequence.maxHints &&
-           !state.currentFeedback?.type.includes('correct') && (
-            <div className="mt-4 pt-3 border-t border-current border-opacity-20">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleHintRequest}
-                className="w-full"
-              >
-                Get Hint ({state.hintSequence.maxHints - state.hintsRevealed} remaining)
-              </Button>
-            </div>
-          )}
+          {showHintButton &&
+            state.hintSequence &&
+            state.hintsRevealed < state.hintSequence.maxHints &&
+            !state.currentFeedback?.type.includes("correct") && (
+              <div className="mt-4 pt-3 border-t border-current border-opacity-20">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleHintRequest}
+                  className="w-full"
+                >
+                  Get Hint ({state.hintSequence.maxHints - state.hintsRevealed}{" "}
+                  remaining)
+                </Button>
+              </div>
+            )}
         </CardBody>
       </Card>
     </div>
@@ -448,9 +473,12 @@ const styles = `
 `;
 
 // Add styles to document if not already present
-if (typeof document !== 'undefined' && !document.getElementById('feedback-panel-styles')) {
-  const styleElement = document.createElement('style');
-  styleElement.id = 'feedback-panel-styles';
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById("feedback-panel-styles")
+) {
+  const styleElement = document.createElement("style");
+  styleElement.id = "feedback-panel-styles";
   styleElement.textContent = styles;
   document.head.appendChild(styleElement);
 }

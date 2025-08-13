@@ -1,35 +1,40 @@
 /**
  * Content Navigation System
- * 
+ *
  * Comprehensive navigation components for lessons including prerequisite checking,
  * breadcrumb navigation, lesson tree, and progress-based restrictions.
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Button } from '../ui/Button';
-import { Card, CardHeader, CardBody } from '../ui/Card';
-import type { Unit, Lesson, ProgressStatus, LearningObjective } from '../../types/content';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { Button } from "../ui/button";
+import { Card, CardHeader, CardBody } from "../ui/Card";
+import type {
+  Unit,
+  Lesson,
+  ProgressStatus,
+  LearningObjective,
+} from "../../types/content";
 
 // ===== NAVIGATION TYPES =====
 
 export interface NavigationNode {
   id: string;
-  type: 'unit' | 'lesson' | 'section';
+  type: "unit" | "lesson" | "section";
   title: string;
   description?: string;
   path: string;
   children?: NavigationNode[];
   parent?: NavigationNode;
-  
+
   // Progress and prerequisites
   status: ProgressStatus;
   isLocked: boolean;
   prerequisites?: string[];
   prerequisitesMet: boolean;
-  
+
   // Metadata
   orderIndex: number;
   estimatedMinutes?: number;
@@ -50,11 +55,14 @@ export interface UserProgress {
   completedUnits: string[];
   currentLesson?: string;
   currentUnit?: string;
-  lessonProgress: Record<string, {
-    status: ProgressStatus;
-    completionPercentage: number;
-    lastAccessed?: Date;
-  }>;
+  lessonProgress: Record<
+    string,
+    {
+      status: ProgressStatus;
+      completionPercentage: number;
+      lastAccessed?: Date;
+    }
+  >;
 }
 
 // ===== MAIN NAVIGATION COMPONENT =====
@@ -83,12 +91,14 @@ export function ContentNavigation({
   showBreadcrumbs = true,
   showProgressIndicators = true,
   allowKeyboardNavigation = true,
-  className = ''
+  className = "",
 }: ContentNavigationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(currentLessonId || null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(
+    currentLessonId || null
+  );
 
   // Build navigation tree from units and lessons
   const navigationTree = useMemo(() => {
@@ -98,53 +108,59 @@ export function ContentNavigation({
   // Find current node and breadcrumbs
   const { currentNode, breadcrumbs } = useMemo(() => {
     if (!selectedNodeId) return { currentNode: undefined, breadcrumbs: [] };
-    
+
     const node = findNodeById(navigationTree, selectedNodeId);
     const crumbs = node ? buildBreadcrumbs(node) : [];
-    
+
     return { currentNode: node, breadcrumbs: crumbs };
   }, [navigationTree, selectedNodeId]);
 
   // Check if navigation to a node is allowed
-  const canNavigate = useCallback((nodeId: string): boolean => {
-    const node = findNodeById(navigationTree, nodeId);
-    if (!node) return false;
-    
-    // Check if node is locked or prerequisites not met
-    if (node.isLocked || !node.prerequisitesMet) {
-      return false;
-    }
-    
-    return true;
-  }, [navigationTree]);
+  const canNavigate = useCallback(
+    (nodeId: string): boolean => {
+      const node = findNodeById(navigationTree, nodeId);
+      if (!node) return false;
+
+      // Check if node is locked or prerequisites not met
+      if (node.isLocked || !node.prerequisitesMet) {
+        return false;
+      }
+
+      return true;
+    },
+    [navigationTree]
+  );
 
   // Handle navigation
-  const handleNavigate = useCallback((nodeId: string) => {
-    if (!canNavigate(nodeId)) {
-      return;
-    }
-    
-    const node = findNodeById(navigationTree, nodeId);
-    if (!node) return;
-    
-    setSelectedNodeId(nodeId);
-    
-    if (node.type === 'lesson') {
-      onNavigate?.(nodeId);
-      router.push(node.path);
-    } else if (node.type === 'unit') {
-      // Expand/collapse unit
-      setExpandedUnits(prev => {
-        const next = new Set(prev);
-        if (next.has(nodeId)) {
-          next.delete(nodeId);
-        } else {
-          next.add(nodeId);
-        }
-        return next;
-      });
-    }
-  }, [canNavigate, navigationTree, onNavigate, router]);
+  const handleNavigate = useCallback(
+    (nodeId: string) => {
+      if (!canNavigate(nodeId)) {
+        return;
+      }
+
+      const node = findNodeById(navigationTree, nodeId);
+      if (!node) return;
+
+      setSelectedNodeId(nodeId);
+
+      if (node.type === "lesson") {
+        onNavigate?.(nodeId);
+        router.push(node.path);
+      } else if (node.type === "unit") {
+        // Expand/collapse unit
+        setExpandedUnits((prev) => {
+          const next = new Set(prev);
+          if (next.has(nodeId)) {
+            next.delete(nodeId);
+          } else {
+            next.add(nodeId);
+          }
+          return next;
+        });
+      }
+    },
+    [canNavigate, navigationTree, onNavigate, router]
+  );
 
   // Keyboard navigation
   useEffect(() => {
@@ -154,41 +170,41 @@ export function ContentNavigation({
       if (!currentNode) return;
 
       switch (e.key) {
-        case 'ArrowLeft':
-        case 'ArrowUp':
+        case "ArrowLeft":
+        case "ArrowUp":
           e.preventDefault();
           navigateToPrevious();
           break;
-        case 'ArrowRight':
-        case 'ArrowDown':
+        case "ArrowRight":
+        case "ArrowDown":
           e.preventDefault();
           navigateToNext();
           break;
-        case 'Enter':
-        case ' ':
+        case "Enter":
+        case " ":
           e.preventDefault();
-          if (currentNode.type === 'lesson') {
+          if (currentNode.type === "lesson") {
             handleNavigate(currentNode.id);
           }
           break;
-        case 'Escape':
+        case "Escape":
           e.preventDefault();
           navigateToParent();
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [allowKeyboardNavigation, currentNode, handleNavigate]);
 
   // Navigate to previous lesson
   const navigateToPrevious = useCallback(() => {
     if (!currentNode) return;
-    
+
     const allLessons = getAllLessons(navigationTree);
-    const currentIndex = allLessons.findIndex(l => l.id === currentNode.id);
-    
+    const currentIndex = allLessons.findIndex((l) => l.id === currentNode.id);
+
     if (currentIndex > 0) {
       const prevLesson = allLessons[currentIndex - 1];
       if (canNavigate(prevLesson.id)) {
@@ -200,10 +216,10 @@ export function ContentNavigation({
   // Navigate to next lesson
   const navigateToNext = useCallback(() => {
     if (!currentNode) return;
-    
+
     const allLessons = getAllLessons(navigationTree);
-    const currentIndex = allLessons.findIndex(l => l.id === currentNode.id);
-    
+    const currentIndex = allLessons.findIndex((l) => l.id === currentNode.id);
+
     if (currentIndex < allLessons.length - 1) {
       const nextLesson = allLessons[currentIndex + 1];
       if (canNavigate(nextLesson.id)) {
@@ -221,7 +237,7 @@ export function ContentNavigation({
   // Auto-expand current unit
   useEffect(() => {
     if (currentNode && currentNode.parent) {
-      setExpandedUnits(prev => new Set([...prev, currentNode.parent!.id]));
+      setExpandedUnits((prev) => new Set([...prev, currentNode.parent!.id]));
     }
   }, [currentNode]);
 
@@ -268,8 +284,19 @@ export function ContentNavigation({
             currentNode={currentNode}
             onPrevious={navigateToPrevious}
             onNext={navigateToNext}
-            canGoPrevious={!!currentNode && getAllLessons(navigationTree).findIndex(l => l.id === currentNode.id) > 0}
-            canGoNext={!!currentNode && getAllLessons(navigationTree).findIndex(l => l.id === currentNode.id) < getAllLessons(navigationTree).length - 1}
+            canGoPrevious={
+              !!currentNode &&
+              getAllLessons(navigationTree).findIndex(
+                (l) => l.id === currentNode.id
+              ) > 0
+            }
+            canGoNext={
+              !!currentNode &&
+              getAllLessons(navigationTree).findIndex(
+                (l) => l.id === currentNode.id
+              ) <
+                getAllLessons(navigationTree).length - 1
+            }
             className="mb-4"
           />
         </main>
@@ -286,13 +313,20 @@ interface BreadcrumbNavigationProps {
   className?: string;
 }
 
-function BreadcrumbNavigation({ breadcrumbs, onNavigate, className = '' }: BreadcrumbNavigationProps) {
+function BreadcrumbNavigation({
+  breadcrumbs,
+  onNavigate,
+  className = "",
+}: BreadcrumbNavigationProps) {
   return (
-    <nav aria-label="Breadcrumb" className={`breadcrumb-navigation ${className}`}>
+    <nav
+      aria-label="Breadcrumb"
+      className={`breadcrumb-navigation ${className}`}
+    >
       <ol className="flex items-center space-x-2 text-sm">
         <li>
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => onNavigate("home")}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             Home
@@ -339,7 +373,7 @@ function LessonTreeNavigation({
   onNavigate,
   canNavigate,
   showProgressIndicators,
-  className = ''
+  className = "",
 }: LessonTreeNavigationProps) {
   return (
     <Card className={`lesson-tree-navigation ${className}`}>
@@ -348,7 +382,7 @@ function LessonTreeNavigation({
       </CardHeader>
       <CardBody className="p-0">
         <div className="divide-y divide-gray-200">
-          {nodes.map(node => (
+          {nodes.map((node) => (
             <TreeNode
               key={node.id}
               node={node}
@@ -385,21 +419,21 @@ function TreeNode({
   onNavigate,
   canNavigate,
   showProgressIndicators,
-  level
+  level,
 }: TreeNodeProps) {
   const isNavigable = canNavigate(node.id);
   const hasChildren = node.children && node.children.length > 0;
-  
+
   return (
     <div>
       <button
         onClick={() => onNavigate(node.id)}
         className={`
           w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors
-          ${isSelected ? 'bg-blue-50 border-l-4 border-blue-600' : ''}
-          ${!isNavigable ? 'opacity-50 cursor-not-allowed' : ''}
+          ${isSelected ? "bg-blue-50 border-l-4 border-blue-600" : ""}
+          ${!isNavigable ? "opacity-50 cursor-not-allowed" : ""}
         `}
-        style={{ paddingLeft: `${(level * 1.5) + 1}rem` }}
+        style={{ paddingLeft: `${level * 1.5 + 1}rem` }}
         disabled={!isNavigable}
       >
         <div className="flex items-center justify-between">
@@ -407,42 +441,43 @@ function TreeNode({
             {/* Expand/Collapse Icon */}
             {hasChildren && (
               <span className="text-gray-400 flex-shrink-0">
-                {isExpanded ? '▼' : '▶'}
+                {isExpanded ? "▼" : "▶"}
               </span>
             )}
-            
+
             {/* Lock Icon */}
             {node.isLocked && (
               <span className="text-gray-400 flex-shrink-0">🔒</span>
             )}
-            
+
             {/* Node Title */}
-            <span className={`truncate ${isSelected ? 'font-semibold' : ''}`}>
+            <span className={`truncate ${isSelected ? "font-semibold" : ""}`}>
               {node.title}
             </span>
-            
+
             {/* Status Badge */}
-            {node.status !== 'not_started' && (
+            {node.status !== "not_started" && (
               <StatusBadge status={node.status} small />
             )}
           </div>
-          
+
           {/* Progress Indicator */}
-          {showProgressIndicators && node.completionPercentage !== undefined && (
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <span className="text-xs text-gray-500">
-                {Math.round(node.completionPercentage)}%
-              </span>
-              <div className="w-12 bg-gray-200 rounded-full h-1.5">
-                <div
-                  className="bg-blue-600 h-1.5 rounded-full transition-all"
-                  style={{ width: `${node.completionPercentage}%` }}
-                />
+          {showProgressIndicators &&
+            node.completionPercentage !== undefined && (
+              <div className="flex items-center space-x-2 flex-shrink-0">
+                <span className="text-xs text-gray-500">
+                  {Math.round(node.completionPercentage)}%
+                </span>
+                <div className="w-12 bg-gray-200 rounded-full h-1.5">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full transition-all"
+                    style={{ width: `${node.completionPercentage}%` }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
-        
+
         {/* Additional Info */}
         {node.estimatedMinutes && (
           <div className="mt-1 text-xs text-gray-500">
@@ -450,11 +485,11 @@ function TreeNode({
           </div>
         )}
       </button>
-      
+
       {/* Children */}
       {hasChildren && isExpanded && (
         <div className="border-l border-gray-200 ml-4">
-          {node.children!.map(child => (
+          {node.children!.map((child) => (
             <TreeNode
               key={child.id}
               node={child}
@@ -489,10 +524,12 @@ function NavigationControls({
   onNext,
   canGoPrevious,
   canGoNext,
-  className = ''
+  className = "",
 }: NavigationControlsProps) {
   return (
-    <div className={`navigation-controls flex justify-between items-center ${className}`}>
+    <div
+      className={`navigation-controls flex justify-between items-center ${className}`}
+    >
       <Button
         variant="outline"
         onClick={onPrevious}
@@ -502,16 +539,18 @@ function NavigationControls({
         <span>←</span>
         <span>Previous</span>
       </Button>
-      
+
       {currentNode && (
         <div className="text-center">
           <h2 className="text-xl font-semibold">{currentNode.title}</h2>
           {currentNode.description && (
-            <p className="text-sm text-gray-600 mt-1">{currentNode.description}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {currentNode.description}
+            </p>
           )}
         </div>
       )}
-      
+
       <Button
         variant="outline"
         onClick={onNext}
@@ -533,11 +572,19 @@ interface ProgressOverviewProps {
   className?: string;
 }
 
-function ProgressOverview({ userProgress, units, className = '' }: ProgressOverviewProps) {
-  const totalLessons = units.reduce((sum, unit) => sum + unit.lessons.length, 0);
+function ProgressOverview({
+  userProgress,
+  units,
+  className = "",
+}: ProgressOverviewProps) {
+  const totalLessons = units.reduce(
+    (sum, unit) => sum + unit.lessons.length,
+    0
+  );
   const completedLessons = userProgress.completedLessons.length;
-  const progressPercentage = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
-  
+  const progressPercentage =
+    totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+
   return (
     <Card className={`progress-overview ${className}`}>
       <CardBody>
@@ -547,12 +594,14 @@ function ProgressOverview({ userProgress, units, className = '' }: ProgressOverv
             {Math.round(progressPercentage)}%
           </span>
         </div>
-        
+
         <div className="space-y-3">
           <div>
             <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>Overall Progress</span>
-              <span>{completedLessons} / {totalLessons} lessons</span>
+              <span>
+                {completedLessons} / {totalLessons} lessons
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
@@ -561,7 +610,7 @@ function ProgressOverview({ userProgress, units, className = '' }: ProgressOverv
               />
             </div>
           </div>
-          
+
           {userProgress.currentLesson && (
             <div className="pt-2 border-t">
               <p className="text-sm text-gray-600">Current Lesson:</p>
@@ -583,24 +632,24 @@ interface StatusBadgeProps {
 
 function StatusBadge({ status, small = false }: StatusBadgeProps) {
   const statusConfig = {
-    not_started: { color: 'gray', label: 'Not Started' },
-    in_progress: { color: 'blue', label: 'In Progress' },
-    completed: { color: 'green', label: 'Completed' },
-    mastered: { color: 'purple', label: 'Mastered' }
+    not_started: { color: "gray", label: "Not Started" },
+    in_progress: { color: "blue", label: "In Progress" },
+    completed: { color: "green", label: "Completed" },
+    mastered: { color: "purple", label: "Mastered" },
   };
-  
+
   const config = statusConfig[status];
-  const sizeClass = small ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1';
-  
+  const sizeClass = small ? "text-xs px-2 py-0.5" : "text-sm px-3 py-1";
+
   return (
     <span
       className={`
         inline-flex items-center rounded-full font-medium
         ${sizeClass}
-        ${config.color === 'gray' ? 'bg-gray-100 text-gray-700' : ''}
-        ${config.color === 'blue' ? 'bg-blue-100 text-blue-700' : ''}
-        ${config.color === 'green' ? 'bg-green-100 text-green-700' : ''}
-        ${config.color === 'purple' ? 'bg-purple-100 text-purple-700' : ''}
+        ${config.color === "gray" ? "bg-gray-100 text-gray-700" : ""}
+        ${config.color === "blue" ? "bg-blue-100 text-blue-700" : ""}
+        ${config.color === "green" ? "bg-green-100 text-green-700" : ""}
+        ${config.color === "purple" ? "bg-purple-100 text-purple-700" : ""}
       `}
     >
       {config.label}
@@ -613,42 +662,58 @@ function StatusBadge({ status, small = false }: StatusBadgeProps) {
 /**
  * Build navigation tree from units and lessons
  */
-function buildNavigationTree(units: Unit[], userProgress?: UserProgress): NavigationNode[] {
-  return units.map(unit => {
+function buildNavigationTree(
+  units: Unit[],
+  userProgress?: UserProgress
+): NavigationNode[] {
+  return units.map((unit) => {
     const unitNode: NavigationNode = {
       id: unit.id,
-      type: 'unit',
+      type: "unit",
       title: unit.title,
       description: unit.description,
       path: `/units/${unit.id}`,
       orderIndex: unit.orderIndex,
       status: getUnitStatus(unit, userProgress),
-      isLocked: !arePrerequisitesMet(unit.prerequisiteUnits || [], userProgress),
+      isLocked: !arePrerequisitesMet(
+        unit.prerequisiteUnits || [],
+        userProgress
+      ),
       prerequisites: unit.prerequisiteUnits,
-      prerequisitesMet: arePrerequisitesMet(unit.prerequisiteUnits || [], userProgress),
+      prerequisitesMet: arePrerequisitesMet(
+        unit.prerequisiteUnits || [],
+        userProgress
+      ),
       completionPercentage: calculateUnitCompletion(unit, userProgress),
-      children: unit.lessons.map(lesson => ({
+      children: unit.lessons.map((lesson) => ({
         id: lesson.id,
-        type: 'lesson',
+        type: "lesson",
         title: lesson.title,
         description: lesson.description,
         path: `/lessons/${lesson.id}`,
         orderIndex: lesson.orderIndex,
         status: getLessonStatus(lesson.id, userProgress),
-        isLocked: !arePrerequisitesMet(lesson.prerequisiteLessons || [], userProgress),
+        isLocked: !arePrerequisitesMet(
+          lesson.prerequisiteLessons || [],
+          userProgress
+        ),
         prerequisites: lesson.prerequisiteLessons,
-        prerequisitesMet: arePrerequisitesMet(lesson.prerequisiteLessons || [], userProgress),
+        prerequisitesMet: arePrerequisitesMet(
+          lesson.prerequisiteLessons || [],
+          userProgress
+        ),
         estimatedMinutes: lesson.estimatedMinutes,
         difficulty: lesson.difficulty,
-        completionPercentage: userProgress?.lessonProgress[lesson.id]?.completionPercentage || 0
-      }))
+        completionPercentage:
+          userProgress?.lessonProgress[lesson.id]?.completionPercentage || 0,
+      })),
     };
-    
+
     // Set parent references
-    unitNode.children?.forEach(child => {
+    unitNode.children?.forEach((child) => {
       child.parent = unitNode;
     });
-    
+
     return unitNode;
   });
 }
@@ -656,7 +721,10 @@ function buildNavigationTree(units: Unit[], userProgress?: UserProgress): Naviga
 /**
  * Find node by ID in navigation tree
  */
-function findNodeById(nodes: NavigationNode[], nodeId: string): NavigationNode | undefined {
+function findNodeById(
+  nodes: NavigationNode[],
+  nodeId: string
+): NavigationNode | undefined {
   for (const node of nodes) {
     if (node.id === nodeId) {
       return node;
@@ -675,12 +743,12 @@ function findNodeById(nodes: NavigationNode[], nodeId: string): NavigationNode |
 function buildBreadcrumbs(node: NavigationNode): NavigationNode[] {
   const breadcrumbs: NavigationNode[] = [];
   let current: NavigationNode | undefined = node;
-  
+
   while (current) {
     breadcrumbs.unshift(current);
     current = current.parent;
   }
-  
+
   return breadcrumbs;
 }
 
@@ -689,94 +757,107 @@ function buildBreadcrumbs(node: NavigationNode): NavigationNode[] {
  */
 function getAllLessons(nodes: NavigationNode[]): NavigationNode[] {
   const lessons: NavigationNode[] = [];
-  
+
   for (const node of nodes) {
-    if (node.type === 'lesson') {
+    if (node.type === "lesson") {
       lessons.push(node);
     }
     if (node.children) {
       lessons.push(...getAllLessons(node.children));
     }
   }
-  
+
   return lessons;
 }
 
 /**
  * Check if prerequisites are met
  */
-function arePrerequisitesMet(prerequisites: string[], userProgress?: UserProgress): boolean {
+function arePrerequisitesMet(
+  prerequisites: string[],
+  userProgress?: UserProgress
+): boolean {
   if (!prerequisites || prerequisites.length === 0) return true;
   if (!userProgress) return false;
-  
-  return prerequisites.every(prereq => 
-    userProgress.completedLessons.includes(prereq) || 
-    userProgress.completedUnits.includes(prereq)
+
+  return prerequisites.every(
+    (prereq) =>
+      userProgress.completedLessons.includes(prereq) ||
+      userProgress.completedUnits.includes(prereq)
   );
 }
 
 /**
  * Get unit completion status
  */
-function getUnitStatus(unit: Unit, userProgress?: UserProgress): ProgressStatus {
-  if (!userProgress) return 'not_started';
-  
+function getUnitStatus(
+  unit: Unit,
+  userProgress?: UserProgress
+): ProgressStatus {
+  if (!userProgress) return "not_started";
+
   if (userProgress.completedUnits.includes(unit.id)) {
-    return 'completed';
+    return "completed";
   }
-  
-  const lessonIds = unit.lessons.map(l => l.id);
-  const completedInUnit = lessonIds.filter(id => 
+
+  const lessonIds = unit.lessons.map((l) => l.id);
+  const completedInUnit = lessonIds.filter((id) =>
     userProgress.completedLessons.includes(id)
   );
-  
-  if (completedInUnit.length === 0) return 'not_started';
-  if (completedInUnit.length < lessonIds.length) return 'in_progress';
-  
+
+  if (completedInUnit.length === 0) return "not_started";
+  if (completedInUnit.length < lessonIds.length) return "in_progress";
+
   // Check mastery threshold
   const avgCompletion = calculateUnitCompletion(unit, userProgress);
   if (avgCompletion >= unit.masteryThreshold * 100) {
-    return 'mastered';
+    return "mastered";
   }
-  
-  return 'completed';
+
+  return "completed";
 }
 
 /**
  * Get lesson completion status
  */
-function getLessonStatus(lessonId: string, userProgress?: UserProgress): ProgressStatus {
-  if (!userProgress) return 'not_started';
-  
+function getLessonStatus(
+  lessonId: string,
+  userProgress?: UserProgress
+): ProgressStatus {
+  if (!userProgress) return "not_started";
+
   if (userProgress.lessonProgress[lessonId]) {
     return userProgress.lessonProgress[lessonId].status;
   }
-  
+
   if (userProgress.completedLessons.includes(lessonId)) {
-    return 'completed';
+    return "completed";
   }
-  
+
   if (userProgress.currentLesson === lessonId) {
-    return 'in_progress';
+    return "in_progress";
   }
-  
-  return 'not_started';
+
+  return "not_started";
 }
 
 /**
  * Calculate unit completion percentage
  */
-function calculateUnitCompletion(unit: Unit, userProgress?: UserProgress): number {
+function calculateUnitCompletion(
+  unit: Unit,
+  userProgress?: UserProgress
+): number {
   if (!userProgress) return 0;
-  
-  const lessonIds = unit.lessons.map(l => l.id);
+
+  const lessonIds = unit.lessons.map((l) => l.id);
   if (lessonIds.length === 0) return 0;
-  
+
   const totalCompletion = lessonIds.reduce((sum, id) => {
     const progress = userProgress.lessonProgress[id];
     return sum + (progress?.completionPercentage || 0);
   }, 0);
-  
+
   return totalCompletion / lessonIds.length;
 }
 

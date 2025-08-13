@@ -1,17 +1,21 @@
 /**
  * Fill in the Blank Exercise Component
- * 
+ *
  * Interactive fill-in-the-blank question component with multiple blanks support,
  * partial credit, and fuzzy matching.
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
-import type { FillInTheBlankProps, ExerciseState, FeedbackMessage } from './types';
-import type { FillInBlankData } from '../../types/content';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Button } from "../ui/button";
+import { Card, CardHeader, CardBody, CardFooter } from "../ui/Card";
+import type {
+  FillInTheBlankProps,
+  ExerciseState,
+  FeedbackMessage,
+} from "./types";
+import type { FillInBlankData } from "../../types/content";
 import {
   createInitialExerciseState,
   updateExerciseState,
@@ -23,7 +27,7 @@ import {
   getKeyboardInstructions,
   isEmptyAnswer,
   validateQuestionData,
-} from './utils';
+} from "./utils";
 
 interface BlankInput {
   id: string;
@@ -42,7 +46,7 @@ export function FillInTheBlank({
   disabled = false,
   showFeedback = true,
   timeLimit,
-  className = '',
+  className = "",
 }: FillInTheBlankProps) {
   // State management
   const [state, setState] = useState<ExerciseState>(createInitialExerciseState);
@@ -55,13 +59,13 @@ export function FillInTheBlank({
   useEffect(() => {
     const errors = validateQuestionData(question);
     if (errors.length > 0) {
-      console.error('Fill in the Blank question validation errors:', errors);
+      console.error("Fill in the Blank question validation errors:", errors);
     }
 
     const data = question.questionData as FillInBlankData;
-    const initialBlanks: BlankInput[] = data.blanks.map(blank => ({
+    const initialBlanks: BlankInput[] = data.blanks.map((blank) => ({
       id: blank.id,
-      value: '',
+      value: "",
       isCorrect: undefined,
       feedback: undefined,
     }));
@@ -69,25 +73,32 @@ export function FillInTheBlank({
   }, [question]);
 
   // Handle input change for a specific blank
-  const handleInputChange = useCallback((blankId: string, value: string) => {
-    if (disabled || state.isAnswered) return;
+  const handleInputChange = useCallback(
+    (blankId: string, value: string) => {
+      if (disabled || state.isAnswered) return;
 
-    setBlankInputs(prev => prev.map(input => 
-      input.id === blankId ? { ...input, value } : input
-    ));
-  }, [disabled, state.isAnswered]);
+      setBlankInputs((prev) =>
+        prev.map((input) =>
+          input.id === blankId ? { ...input, value } : input
+        )
+      );
+    },
+    [disabled, state.isAnswered]
+  );
 
   // Handle answer submission
   const handleSubmit = useCallback(() => {
     if (disabled || state.isAnswered) return;
 
     // Check if all blanks are filled
-    const hasEmptyBlanks = blankInputs.some(input => isEmptyAnswer(input.value));
+    const hasEmptyBlanks = blankInputs.some((input) =>
+      isEmptyAnswer(input.value)
+    );
     if (hasEmptyBlanks) {
       setFeedback({
-        type: 'incorrect',
-        title: 'Incomplete',
-        message: 'Please fill in all blanks before submitting.',
+        type: "incorrect",
+        title: "Incomplete",
+        message: "Please fill in all blanks before submitting.",
         isVisible: true,
         points: 0,
       });
@@ -95,29 +106,38 @@ export function FillInTheBlank({
     }
 
     // Collect answers in order
-    const userAnswers = blankInputs.map(input => input.value);
-    
+    const userAnswers = blankInputs.map((input) => input.value);
+
     // Validate answer
-    const validation = validateAnswer(question, userAnswers, state.hintsUsed, state.timeSpent);
-    const newState = updateExerciseState(state, userAnswers, validation.isCorrect);
-    
+    const validation = validateAnswer(
+      question,
+      userAnswers,
+      state.hintsUsed,
+      state.timeSpent
+    );
+    const newState = updateExerciseState(
+      state,
+      userAnswers,
+      validation.isCorrect
+    );
+
     setState(newState);
 
     // Check individual blanks for feedback
     const data = question.questionData as FillInBlankData;
     const updatedBlanks = blankInputs.map((input, index) => {
       const blank = data.blanks[index];
-      const isCorrect = blank.acceptableAnswers.some(answer => 
-        blank.caseSensitive 
-          ? input.value === answer 
+      const isCorrect = blank.acceptableAnswers.some((answer) =>
+        blank.caseSensitive
+          ? input.value === answer
           : input.value.toLowerCase() === answer.toLowerCase()
       );
 
       return {
         ...input,
         isCorrect,
-        feedback: isCorrect 
-          ? 'Correct!' 
+        feedback: isCorrect
+          ? "Correct!"
           : `Expected: ${blank.acceptableAnswers[0]}`,
       };
     });
@@ -126,12 +146,16 @@ export function FillInTheBlank({
 
     // Create and show overall feedback
     if (showFeedback) {
-      const feedbackType = validation.isCorrect 
-        ? 'correct' 
-        : validation.partialCredit 
-          ? 'partial' 
-          : 'incorrect';
-      const feedbackMessage = createFeedbackMessage(feedbackType, validation, state.hintsUsed);
+      const feedbackType = validation.isCorrect
+        ? "correct"
+        : validation.partialCredit
+        ? "partial"
+        : "incorrect";
+      const feedbackMessage = createFeedbackMessage(
+        feedbackType,
+        validation,
+        state.hintsUsed
+      );
       setFeedback(feedbackMessage);
     }
 
@@ -150,50 +174,59 @@ export function FillInTheBlank({
   // Handle hint request
   const handleHintRequest = useCallback(() => {
     if (!onHintRequest || disabled) return;
-    
+
     setState(useHint);
     onHintRequest();
   }, [onHintRequest, disabled]);
 
   // Handle keyboard navigation
-  const handleKeyDown = useCallback((event: React.KeyboardEvent, blankIndex: number) => {
-    if (disabled || state.isAnswered) return;
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent, blankIndex: number) => {
+      if (disabled || state.isAnswered) return;
 
-    switch (event.key) {
-      case 'Tab':
-        // Let default tab behavior work
-        break;
-      case 'Enter':
-        if (event.ctrlKey || event.metaKey) {
-          event.preventDefault();
-          handleSubmit();
-        }
-        break;
-      case 'ArrowRight':
-        if (event.ctrlKey) {
-          event.preventDefault();
-          const nextIndex = Math.min(blankIndex + 1, blankInputs.length - 1);
-          inputRefs.current[nextIndex]?.focus();
-          setCurrentFocusIndex(nextIndex);
-        }
-        break;
-      case 'ArrowLeft':
-        if (event.ctrlKey) {
-          event.preventDefault();
-          const prevIndex = Math.max(blankIndex - 1, 0);
-          inputRefs.current[prevIndex]?.focus();
-          setCurrentFocusIndex(prevIndex);
-        }
-        break;
-      case 'h':
-      case 'H':
-        if (event.ctrlKey || event.metaKey) {
-          event.preventDefault();
-          handleHintRequest();
-        }
-        break;
-    }
-  }, [disabled, state.isAnswered, blankInputs.length, handleSubmit, handleHintRequest]);
+      switch (event.key) {
+        case "Tab":
+          // Let default tab behavior work
+          break;
+        case "Enter":
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            handleSubmit();
+          }
+          break;
+        case "ArrowRight":
+          if (event.ctrlKey) {
+            event.preventDefault();
+            const nextIndex = Math.min(blankIndex + 1, blankInputs.length - 1);
+            inputRefs.current[nextIndex]?.focus();
+            setCurrentFocusIndex(nextIndex);
+          }
+          break;
+        case "ArrowLeft":
+          if (event.ctrlKey) {
+            event.preventDefault();
+            const prevIndex = Math.max(blankIndex - 1, 0);
+            inputRefs.current[prevIndex]?.focus();
+            setCurrentFocusIndex(prevIndex);
+          }
+          break;
+        case "h":
+        case "H":
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            handleHintRequest();
+          }
+          break;
+      }
+    },
+    [
+      disabled,
+      state.isAnswered,
+      blankInputs.length,
+      handleSubmit,
+      handleHintRequest,
+    ]
+  );
 
   // Render the template with input fields
   const renderTemplate = () => {
@@ -206,7 +239,7 @@ export function FillInTheBlank({
     data.blanks.forEach((blank, index) => {
       const placeholder = `{${blank.id}}`;
       const placeholderIndex = template.indexOf(placeholder, lastIndex);
-      
+
       if (placeholderIndex !== -1) {
         // Add text before the blank
         if (placeholderIndex > lastIndex) {
@@ -218,16 +251,16 @@ export function FillInTheBlank({
         }
 
         // Add the input field
-        const blankInput = blankInputs.find(input => input.id === blank.id);
+        const blankInput = blankInputs.find((input) => input.id === blank.id);
         const isCorrect = state.isAnswered && blankInput?.isCorrect;
         const isIncorrect = state.isAnswered && blankInput?.isCorrect === false;
 
         parts.push(
           <span key={`blank-${blank.id}`} className="inline-block mx-1">
             <input
-              ref={el => inputRefs.current[index] = el}
+              ref={(el) => (inputRefs.current[index] = el)}
               type="text"
-              value={blankInput?.value || ''}
+              value={blankInput?.value || ""}
               onChange={(e) => handleInputChange(blank.id, e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, index)}
               disabled={disabled || state.isAnswered}
@@ -236,19 +269,36 @@ export function FillInTheBlank({
               className={`
                 inline-block px-3 py-1 border-b-2 bg-transparent
                 transition-colors duration-200 text-center
-                ${currentFocusIndex === index ? 'ring-2 ring-blue-500 ring-offset-1' : ''}
-                ${isCorrect ? 'border-green-500 text-green-700 bg-green-50' : ''}
-                ${isIncorrect ? 'border-red-500 text-red-700 bg-red-50' : ''}
-                ${!state.isAnswered ? 'border-gray-400 focus:border-blue-500' : ''}
-                ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                ${
+                  currentFocusIndex === index
+                    ? "ring-2 ring-blue-500 ring-offset-1"
+                    : ""
+                }
+                ${
+                  isCorrect ? "border-green-500 text-green-700 bg-green-50" : ""
+                }
+                ${isIncorrect ? "border-red-500 text-red-700 bg-red-50" : ""}
+                ${
+                  !state.isAnswered
+                    ? "border-gray-400 focus:border-blue-500"
+                    : ""
+                }
+                ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
-              style={{ width: `${Math.max(100, (blank.acceptableAnswers[0]?.length || 10) * 10)}px` }}
+              style={{
+                width: `${Math.max(
+                  100,
+                  (blank.acceptableAnswers[0]?.length || 10) * 10
+                )}px`,
+              }}
             />
             {state.isAnswered && blankInput?.feedback && (
-              <div className={`
+              <div
+                className={`
                 text-xs mt-1 
-                ${isCorrect ? 'text-green-600' : 'text-red-600'}
-              `}>
+                ${isCorrect ? "text-green-600" : "text-red-600"}
+              `}
+              >
                 {blankInput.feedback}
               </div>
             )}
@@ -261,11 +311,7 @@ export function FillInTheBlank({
 
     // Add any remaining text after the last blank
     if (lastIndex < template.length) {
-      parts.push(
-        <span key="text-final">
-          {template.substring(lastIndex)}
-        </span>
-      );
+      parts.push(<span key="text-final">{template.substring(lastIndex)}</span>);
     }
 
     return parts;
@@ -273,18 +319,14 @@ export function FillInTheBlank({
 
   return (
     <Card className={`fill-in-blank-exercise ${className}`}>
-      <Card.Header>
-        <h3 className="text-lg font-semibold mb-2">
-          {question.questionText}
-        </h3>
+      <CardHeader>
+        <h3 className="text-lg font-semibold mb-2">{question.questionText}</h3>
         {question.description && (
-          <p className="text-sm text-gray-600 mb-4">
-            {question.description}
-          </p>
+          <p className="text-sm text-gray-600 mb-4">{question.description}</p>
         )}
-      </Card.Header>
+      </CardHeader>
 
-      <Card.Body>
+      <CardBody>
         <div
           className="fill-in-blank-template text-lg leading-relaxed"
           role="group"
@@ -295,7 +337,7 @@ export function FillInTheBlank({
 
         {/* Keyboard instructions */}
         <div className="mt-4 text-xs text-gray-500">
-          {getKeyboardInstructions('fill_in_blank')}
+          {getKeyboardInstructions("fill_in_blank")}
           <br />
           Tip: Use Ctrl+Arrow keys to navigate between blanks
         </div>
@@ -305,9 +347,21 @@ export function FillInTheBlank({
           <div
             className={`
               mt-4 p-4 rounded-lg border-l-4
-              ${feedback.type === 'correct' ? 'bg-green-50 border-green-500 text-green-800' : ''}
-              ${feedback.type === 'incorrect' ? 'bg-red-50 border-red-500 text-red-800' : ''}
-              ${feedback.type === 'partial' ? 'bg-yellow-50 border-yellow-500 text-yellow-800' : ''}
+              ${
+                feedback.type === "correct"
+                  ? "bg-green-50 border-green-500 text-green-800"
+                  : ""
+              }
+              ${
+                feedback.type === "incorrect"
+                  ? "bg-red-50 border-red-500 text-red-800"
+                  : ""
+              }
+              ${
+                feedback.type === "partial"
+                  ? "bg-yellow-50 border-yellow-500 text-yellow-800"
+                  : ""
+              }
             `}
             role="alert"
             aria-live="polite"
@@ -324,9 +378,9 @@ export function FillInTheBlank({
             )}
           </div>
         )}
-      </Card.Body>
+      </CardBody>
 
-      <Card.Footer>
+      <CardFooter>
         <div className="flex justify-between items-center">
           <div className="flex space-x-2">
             {/* Hint button */}
@@ -352,7 +406,7 @@ export function FillInTheBlank({
             className="submit-button"
             aria-label="Submit answer"
           >
-            {state.isAnswered ? 'Submitted' : 'Submit Answer'}
+            {state.isAnswered ? "Submitted" : "Submit Answer"}
           </Button>
         </div>
 
@@ -362,7 +416,7 @@ export function FillInTheBlank({
             Time limit: {timeLimit} seconds
           </div>
         )}
-        
+
         {state.hintsUsed > 0 && (
           <div className="mt-1 text-sm text-gray-600">
             Hints used: {state.hintsUsed}
@@ -371,9 +425,10 @@ export function FillInTheBlank({
 
         {/* Blank count indicator */}
         <div className="mt-1 text-sm text-gray-600">
-          {blankInputs.filter(b => b.value).length} of {blankInputs.length} blanks filled
+          {blankInputs.filter((b) => b.value).length} of {blankInputs.length}{" "}
+          blanks filled
         </div>
-      </Card.Footer>
+      </CardFooter>
     </Card>
   );
 }

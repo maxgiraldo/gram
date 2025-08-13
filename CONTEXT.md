@@ -50,13 +50,16 @@ Gram is an interactive web application for learning grammar based on **mastery l
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 with React 19 and TypeScript
-- **Database**: SQLite with Prisma ORM
+- **Framework**: Next.js 15.4.6 with App Router, React 19.1, TypeScript 5.8
+- **Database**: Prisma 6.14 ORM with SQLite (dev) / PostgreSQL (production)
 - **Package Manager**: pnpm
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand (lightweight)
-- **Testing**: Jest + React Testing Library
+- **Styling**: Tailwind CSS v4.1.11 with CSS-first configuration
+- **UI Components**: Catalyst UI Kit with Linear-style design system
+- **Animations**: Framer Motion
+- **State Management**: React hooks and context (Zustand ready if needed)
+- **Testing**: Vitest with React Testing Library
 - **Linting**: ESLint with Next.js config
+- **Validation**: Zod schemas for type-safe validation
 
 ## Project Structure
 
@@ -142,10 +145,12 @@ pnpm run test:coverage # Run tests with coverage report
 
 ### Styling Approach
 
-- **Tailwind CSS** for all styling
+- **Tailwind CSS v4.1** with CSS-first configuration using `@theme` directive
+- **Modern P3 color palette** using OKLCH color space
 - **Mobile-first responsive design**
-- **Component-based design system** in `/components/ui/`
-- **Consistent spacing and color variables**
+- **Component-based design system** with Catalyst UI Kit in `/components/ui/`
+- **Linear-style UI** with glass morphism effects and smooth animations
+- **CSS variables** for all design tokens (accessible at runtime)
 - **WCAG 2.1 AA accessibility compliance**
 
 ### Code Quality Standards

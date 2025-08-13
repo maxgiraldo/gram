@@ -1,98 +1,275 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Theme configuration for Tailwind CSS v4 */
+@theme {
+  /* Colors */
+  --color-gray-50: oklch(0.99 0 0);
+  --color-gray-100: oklch(0.975 0 0);
+  --color-gray-200: oklch(0.93 0 0);
+  --color-gray-300: oklch(0.87 0 0);
+  --color-gray-400: oklch(0.70 0.01 0);
+  --color-gray-500: oklch(0.55 0.01 0);
+  --color-gray-600: oklch(0.43 0.01 0);
+  --color-gray-700: oklch(0.34 0.01 0);
+  --color-gray-800: oklch(0.24 0.01 0);
+  --color-gray-900: oklch(0.17 0.01 0);
+  --color-gray-950: oklch(0.10 0.01 0);
+
+  --color-blue-50: oklch(0.97 0.01 237.69);
+  --color-blue-100: oklch(0.93 0.04 236.62);
+  --color-blue-200: oklch(0.87 0.08 236.31);
+  --color-blue-300: oklch(0.79 0.13 237.02);
+  --color-blue-400: oklch(0.68 0.17 237.21);
+  --color-blue-500: oklch(0.58 0.19 241.16);
+  --color-blue-600: oklch(0.49 0.21 250.59);
+  --color-blue-700: oklch(0.42 0.18 252.46);
+  --color-blue-800: oklch(0.36 0.14 251.90);
+  --color-blue-900: oklch(0.31 0.10 250.40);
+
+  --color-violet-50: oklch(0.97 0.01 292.19);
+  --color-violet-100: oklch(0.95 0.03 292.58);
+  --color-violet-200: oklch(0.91 0.07 292.82);
+  --color-violet-300: oklch(0.84 0.14 293.24);
+  --color-violet-400: oklch(0.74 0.22 293.70);
+  --color-violet-500: oklch(0.64 0.25 293.54);
+  --color-violet-600: oklch(0.54 0.26 293.08);
+  --color-violet-700: oklch(0.45 0.22 293.52);
+  --color-violet-800: oklch(0.39 0.18 293.71);
+  --color-violet-900: oklch(0.32 0.13 294.10);
+
+  --color-green-50: oklch(0.98 0.01 142.84);
+  --color-green-100: oklch(0.95 0.04 143.29);
+  --color-green-200: oklch(0.91 0.09 143.66);
+  --color-green-300: oklch(0.84 0.16 144.01);
+  --color-green-400: oklch(0.73 0.20 144.92);
+  --color-green-500: oklch(0.62 0.19 146.84);
+  --color-green-600: oklch(0.52 0.16 149.48);
+  --color-green-700: oklch(0.43 0.13 150.87);
+  --color-green-800: oklch(0.36 0.10 150.63);
+  --color-green-900: oklch(0.30 0.08 149.92);
+
+  --color-red-50: oklch(0.97 0.01 25.33);
+  --color-red-100: oklch(0.94 0.03 25.57);
+  --color-red-200: oklch(0.90 0.07 25.47);
+  --color-red-300: oklch(0.83 0.13 25.14);
+  --color-red-400: oklch(0.71 0.20 24.56);
+  --color-red-500: oklch(0.60 0.22 25.65);
+  --color-red-600: oklch(0.50 0.21 27.32);
+  --color-red-700: oklch(0.42 0.18 27.37);
+  --color-red-800: oklch(0.36 0.15 26.78);
+  --color-red-900: oklch(0.31 0.12 25.87);
+
+  --color-yellow-50: oklch(0.99 0.02 102.08);
+  --color-yellow-100: oklch(0.97 0.07 103.26);
+  --color-yellow-200: oklch(0.93 0.14 103.59);
+  --color-yellow-300: oklch(0.87 0.19 98.18);
+  --color-yellow-400: oklch(0.80 0.19 91.38);
+  --color-yellow-500: oklch(0.72 0.17 85.34);
+  --color-yellow-600: oklch(0.60 0.15 75.00);
+  --color-yellow-700: oklch(0.48 0.12 62.94);
+  --color-yellow-800: oklch(0.41 0.10 56.02);
+  --color-yellow-900: oklch(0.35 0.08 51.00);
+
+  /* Fonts */
+  --font-sans: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Spacing */
+  --spacing: 0.25rem;
+  
+  /* Border radius */
+  --radius: 0.5rem;
+  
+  /* Breakpoints */
+  --breakpoint-3xl: 1920px;
+}
 
 /* Import accessibility styles */
 @import '../styles/accessibility.css';
 
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* Base styles */
+@layer base {
+  * {
+    border-color: var(--color-gray-200);
+  }
 
-  color-scheme: light;
-  color: #213547;
-  background-color: #ffffff;
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-sans);
+  }
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  body {
+    background-color: var(--color-gray-50);
+    color: var(--color-gray-900);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--color-gray-900);
+  }
+
+  h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--color-gray-900);
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--color-gray-900);
+  }
+
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-gray-900);
+  }
+
+  p {
+    font-size: 1rem;
+    color: var(--color-gray-600);
+    line-height: 1.625;
+  }
+
+  a {
+    color: var(--color-blue-600);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  a:hover {
+    color: var(--color-blue-700);
+  }
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Component styles */
+@layer components {
+  /* Glass morphism */
+  .glass {
+    background: color-mix(in oklch, white 80%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in oklch, white 20%, transparent);
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    transition: transform 0.2s;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Container */
+  .container-app {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-app {
+      padding: 0 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-app {
+      padding: 0 2rem;
+    }
+  }
+
+  /* Smooth animations */
+  .animate-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: var(--color-gray-100);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--color-gray-400);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-500);
+  }
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+/* Utilities */
+@layer utilities {
+  /* Text gradients */
+  .text-gradient {
+    background: linear-gradient(to right, var(--color-blue-600), var(--color-violet-600));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Shadows */
+  .shadow-soft {
+    box-shadow: 0 4px 14px 0 color-mix(in oklch, black 8%, transparent);
+  }
+
+  .shadow-hard {
+    box-shadow: 0 10px 40px 0 color-mix(in oklch, black 15%, transparent);
+  }
+
+  /* Selection */
+  ::selection {
+    background: var(--color-blue-100);
+    color: var(--color-blue-900);
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-/* Button styles are handled by Tailwind components */
-
+/* Remove default styles that conflict */
 .container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+  all: unset;
 }
 
 .card {
-  padding: 2em;
+  all: unset;
+}
+
+.logo {
+  all: unset;
 }
 
 .read-the-docs {
-  color: #888;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
+  all: unset;
 }

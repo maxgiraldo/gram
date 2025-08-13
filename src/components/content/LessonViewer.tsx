@@ -1,26 +1,31 @@
 /**
  * Lesson Viewer Component
- * 
+ *
  * Main component for rendering lesson content with dynamic content rendering
  * and navigation between lesson sections.
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Button } from '../ui/Button';
-import { Card, CardHeader, CardBody, CardFooter } from '../ui/Card';
-import { MultipleChoice, FillInTheBlank, DragAndDrop, SentenceBuilder } from '../exercises';
-import type { 
-  Lesson, 
-  Exercise, 
-  Assessment, 
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Button } from "../ui/button";
+import { Card, CardHeader, CardBody, CardFooter } from "../ui/Card";
+import {
+  MultipleChoice,
+  FillInTheBlank,
+  DragAndDrop,
+  SentenceBuilder,
+} from "../exercises";
+import type {
+  Lesson,
+  Exercise,
+  Assessment,
   LearningObjective,
   ProgressStatus,
   ExerciseQuestion,
-  QuestionType
-} from '../../types/content';
-import type { ExerciseAnswer } from '../exercises/types';
+  QuestionType,
+} from "../../types/content";
+import type { ExerciseAnswer } from "../exercises/types";
 
 export interface LessonProgress {
   lessonId: string;
@@ -48,7 +53,7 @@ export interface LessonViewerProps {
 
 type LessonSection = {
   id: string;
-  type: 'content' | 'exercise' | 'assessment' | 'objective';
+  type: "content" | "exercise" | "assessment" | "objective";
   title: string;
   data: any;
   isCompleted: boolean;
@@ -66,19 +71,20 @@ export function LessonViewer({
   onAssessmentComplete,
   onLessonComplete,
   onNavigateToSection,
-  className = '',
+  className = "",
   showProgress = true,
   autoAdvance = false,
 }: LessonViewerProps) {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const [localProgress, setLocalProgress] = useState<LessonProgress>(() => 
-    progress || {
-      lessonId: lesson.id,
-      status: 'not_started',
-      completedSections: [],
-      currentSection: '',
-      timeSpent: 0,
-    }
+  const [localProgress, setLocalProgress] = useState<LessonProgress>(
+    () =>
+      progress || {
+        lessonId: lesson.id,
+        status: "not_started",
+        completedSections: [],
+        currentSection: "",
+        timeSpent: 0,
+      }
   );
 
   // Create lesson sections from lesson content
@@ -88,11 +94,11 @@ export function LessonViewer({
     // Main content section
     if (lesson.content && lesson.content.trim()) {
       sections.push({
-        id: 'content',
-        type: 'content',
-        title: 'Lesson Content',
+        id: "content",
+        type: "content",
+        title: "Lesson Content",
         data: lesson.content,
-        isCompleted: localProgress.completedSections.includes('content'),
+        isCompleted: localProgress.completedSections.includes("content"),
         isRequired: true,
       });
     }
@@ -102,10 +108,12 @@ export function LessonViewer({
       lesson.objectives.forEach((objective, index) => {
         sections.push({
           id: `objective-${objective.id}`,
-          type: 'objective',
+          type: "objective",
           title: `Objective: ${objective.title}`,
           data: objective,
-          isCompleted: localProgress.completedSections.includes(`objective-${objective.id}`),
+          isCompleted: localProgress.completedSections.includes(
+            `objective-${objective.id}`
+          ),
           isRequired: true,
         });
       });
@@ -118,11 +126,13 @@ export function LessonViewer({
         .forEach((exercise) => {
           sections.push({
             id: `exercise-${exercise.id}`,
-            type: 'exercise',
+            type: "exercise",
             title: exercise.title,
             data: exercise,
-            isCompleted: localProgress.completedSections.includes(`exercise-${exercise.id}`),
-            isRequired: exercise.type !== 'enrichment',
+            isCompleted: localProgress.completedSections.includes(
+              `exercise-${exercise.id}`
+            ),
+            isRequired: exercise.type !== "enrichment",
           });
         });
     }
@@ -132,11 +142,13 @@ export function LessonViewer({
       lesson.assessments.forEach((assessment) => {
         sections.push({
           id: `assessment-${assessment.id}`,
-          type: 'assessment',
+          type: "assessment",
           title: `Assessment: ${assessment.title}`,
           data: assessment,
-          isCompleted: localProgress.completedSections.includes(`assessment-${assessment.id}`),
-          isRequired: assessment.type !== 'enrichment',
+          isCompleted: localProgress.completedSections.includes(
+            `assessment-${assessment.id}`
+          ),
+          isRequired: assessment.type !== "enrichment",
         });
       });
     }
@@ -156,23 +168,26 @@ export function LessonViewer({
     return currentSectionIndex > 0;
   }, [currentSectionIndex]);
 
-  const navigateToSection = useCallback((index: number) => {
-    if (index >= 0 && index < lessonSections.length) {
-      setCurrentSectionIndex(index);
-      const section = lessonSections[index];
-      
-      // Update current section in progress
-      const updatedProgress = {
-        ...localProgress,
-        currentSection: section.id,
-        status: 'in_progress' as ProgressStatus,
-      };
-      
-      setLocalProgress(updatedProgress);
-      onProgressUpdate?.(updatedProgress);
-      onNavigateToSection?.(section.id);
-    }
-  }, [lessonSections, localProgress, onProgressUpdate, onNavigateToSection]);
+  const navigateToSection = useCallback(
+    (index: number) => {
+      if (index >= 0 && index < lessonSections.length) {
+        setCurrentSectionIndex(index);
+        const section = lessonSections[index];
+
+        // Update current section in progress
+        const updatedProgress = {
+          ...localProgress,
+          currentSection: section.id,
+          status: "in_progress" as ProgressStatus,
+        };
+
+        setLocalProgress(updatedProgress);
+        onProgressUpdate?.(updatedProgress);
+        onNavigateToSection?.(section.id);
+      }
+    },
+    [lessonSections, localProgress, onProgressUpdate, onNavigateToSection]
+  );
 
   const navigateNext = useCallback(() => {
     if (canNavigateNext()) {
@@ -187,63 +202,84 @@ export function LessonViewer({
   }, [canNavigatePrev, navigateToSection, currentSectionIndex]);
 
   // Mark section as completed
-  const markSectionCompleted = useCallback((sectionId: string) => {
-    if (!localProgress.completedSections.includes(sectionId)) {
-      const updatedProgress = {
-        ...localProgress,
-        completedSections: [...localProgress.completedSections, sectionId],
-      };
+  const markSectionCompleted = useCallback(
+    (sectionId: string) => {
+      if (!localProgress.completedSections.includes(sectionId)) {
+        const updatedProgress = {
+          ...localProgress,
+          completedSections: [...localProgress.completedSections, sectionId],
+        };
 
-      // Check if all required sections are completed
-      const requiredSections = lessonSections.filter(s => s.isRequired);
-      const completedRequiredSections = requiredSections.filter(s => 
-        updatedProgress.completedSections.includes(s.id)
-      );
+        // Check if all required sections are completed
+        const requiredSections = lessonSections.filter((s) => s.isRequired);
+        const completedRequiredSections = requiredSections.filter((s) =>
+          updatedProgress.completedSections.includes(s.id)
+        );
 
-      if (completedRequiredSections.length === requiredSections.length) {
-        updatedProgress.status = 'completed';
-        updatedProgress.completedAt = new Date();
-        
-        // Calculate final score based on exercises and assessments
-        const finalScore = calculateLessonScore(lesson, updatedProgress);
-        onLessonComplete?.(lesson.id, finalScore);
+        if (completedRequiredSections.length === requiredSections.length) {
+          updatedProgress.status = "completed";
+          updatedProgress.completedAt = new Date();
+
+          // Calculate final score based on exercises and assessments
+          const finalScore = calculateLessonScore(lesson, updatedProgress);
+          onLessonComplete?.(lesson.id, finalScore);
+        }
+
+        setLocalProgress(updatedProgress);
+        onProgressUpdate?.(updatedProgress);
+
+        // Auto-advance if enabled and not the last section
+        if (autoAdvance && canNavigateNext()) {
+          setTimeout(() => navigateNext(), 1500);
+        }
       }
-
-      setLocalProgress(updatedProgress);
-      onProgressUpdate?.(updatedProgress);
-
-      // Auto-advance if enabled and not the last section
-      if (autoAdvance && canNavigateNext()) {
-        setTimeout(() => navigateNext(), 1500);
-      }
-    }
-  }, [localProgress, lessonSections, autoAdvance, canNavigateNext, navigateNext, lesson, onProgressUpdate, onLessonComplete]);
+    },
+    [
+      localProgress,
+      lessonSections,
+      autoAdvance,
+      canNavigateNext,
+      navigateNext,
+      lesson,
+      onProgressUpdate,
+      onLessonComplete,
+    ]
+  );
 
   // Handle exercise answer
-  const handleExerciseAnswer = useCallback((answer: ExerciseAnswer) => {
-    onExerciseAnswer?.(answer);
-    
-    // Mark exercise section as completed if answer is correct or attempts exhausted
-    if (answer.isCorrect || answer.isLastAttempt) {
-      markSectionCompleted(`exercise-${answer.exerciseId}`);
-    }
-  }, [onExerciseAnswer, markSectionCompleted]);
+  const handleExerciseAnswer = useCallback(
+    (answer: ExerciseAnswer) => {
+      onExerciseAnswer?.(answer);
+
+      // Mark exercise section as completed if answer is correct or attempts exhausted
+      if (answer.isCorrect || answer.isLastAttempt) {
+        markSectionCompleted(`exercise-${answer.exerciseId}`);
+      }
+    },
+    [onExerciseAnswer, markSectionCompleted]
+  );
 
   // Handle assessment completion
-  const handleAssessmentComplete = useCallback((assessmentId: string, score: number) => {
-    onAssessmentComplete?.(assessmentId, score);
-    markSectionCompleted(`assessment-${assessmentId}`);
-  }, [onAssessmentComplete, markSectionCompleted]);
+  const handleAssessmentComplete = useCallback(
+    (assessmentId: string, score: number) => {
+      onAssessmentComplete?.(assessmentId, score);
+      markSectionCompleted(`assessment-${assessmentId}`);
+    },
+    [onAssessmentComplete, markSectionCompleted]
+  );
 
   // Handle content section completion
   const handleContentComplete = useCallback(() => {
-    markSectionCompleted('content');
+    markSectionCompleted("content");
   }, [markSectionCompleted]);
 
   // Handle objective review completion
-  const handleObjectiveComplete = useCallback((objectiveId: string) => {
-    markSectionCompleted(`objective-${objectiveId}`);
-  }, [markSectionCompleted]);
+  const handleObjectiveComplete = useCallback(
+    (objectiveId: string) => {
+      markSectionCompleted(`objective-${objectiveId}`);
+    },
+    [markSectionCompleted]
+  );
 
   // Initialize current section on mount
   useEffect(() => {
@@ -251,10 +287,10 @@ export function LessonViewer({
       const updatedProgress = {
         ...localProgress,
         currentSection: currentSection.id,
-        status: 'in_progress' as ProgressStatus,
+        status: "in_progress" as ProgressStatus,
         startedAt: localProgress.startedAt || new Date(),
       };
-      
+
       setLocalProgress(updatedProgress);
       onProgressUpdate?.(updatedProgress);
     }
@@ -262,64 +298,76 @@ export function LessonViewer({
 
   // Progress calculation
   const progressPercentage = useMemo(() => {
-    const totalSections = lessonSections.filter(s => s.isRequired).length;
-    const completedSections = lessonSections.filter(s => 
-      s.isRequired && localProgress.completedSections.includes(s.id)
+    const totalSections = lessonSections.filter((s) => s.isRequired).length;
+    const completedSections = lessonSections.filter(
+      (s) => s.isRequired && localProgress.completedSections.includes(s.id)
     ).length;
-    
+
     return totalSections > 0 ? (completedSections / totalSections) * 100 : 0;
   }, [lessonSections, localProgress.completedSections]);
 
   // Render section content
-  const renderSectionContent = useCallback((section: LessonSection) => {
-    switch (section.type) {
-      case 'content':
-        return (
-          <ContentRenderer 
-            content={section.data}
-            onComplete={handleContentComplete}
-            isCompleted={section.isCompleted}
-          />
-        );
-        
-      case 'objective':
-        return (
-          <ObjectiveRenderer 
-            objective={section.data}
-            onComplete={() => handleObjectiveComplete(section.data.id)}
-            isCompleted={section.isCompleted}
-          />
-        );
-        
-      case 'exercise':
-        return (
-          <ExerciseRenderer 
-            exercise={section.data}
-            onAnswer={handleExerciseAnswer}
-            isCompleted={section.isCompleted}
-          />
-        );
-        
-      case 'assessment':
-        return (
-          <AssessmentRenderer 
-            assessment={section.data}
-            onComplete={(score) => handleAssessmentComplete(section.data.id, score)}
-            isCompleted={section.isCompleted}
-          />
-        );
-        
-      default:
-        return <div>Unknown section type</div>;
-    }
-  }, [handleContentComplete, handleObjectiveComplete, handleExerciseAnswer, handleAssessmentComplete]);
+  const renderSectionContent = useCallback(
+    (section: LessonSection) => {
+      switch (section.type) {
+        case "content":
+          return (
+            <ContentRenderer
+              content={section.data}
+              onComplete={handleContentComplete}
+              isCompleted={section.isCompleted}
+            />
+          );
+
+        case "objective":
+          return (
+            <ObjectiveRenderer
+              objective={section.data}
+              onComplete={() => handleObjectiveComplete(section.data.id)}
+              isCompleted={section.isCompleted}
+            />
+          );
+
+        case "exercise":
+          return (
+            <ExerciseRenderer
+              exercise={section.data}
+              onAnswer={handleExerciseAnswer}
+              isCompleted={section.isCompleted}
+            />
+          );
+
+        case "assessment":
+          return (
+            <AssessmentRenderer
+              assessment={section.data}
+              onComplete={(score) =>
+                handleAssessmentComplete(section.data.id, score)
+              }
+              isCompleted={section.isCompleted}
+            />
+          );
+
+        default:
+          return <div>Unknown section type</div>;
+      }
+    },
+    [
+      handleContentComplete,
+      handleObjectiveComplete,
+      handleExerciseAnswer,
+      handleAssessmentComplete,
+    ]
+  );
 
   if (!currentSection) {
     return (
       <Card className={className}>
         <CardBody>
           <div className="text-center py-8">
-            <p className="text-gray-500">No content available for this lesson.</p>
+            <p className="text-gray-500">
+              No content available for this lesson.
+            </p>
           </div>
         </CardBody>
       </Card>
@@ -333,20 +381,22 @@ export function LessonViewer({
         <Card className="mb-4 md:mb-6">
           <CardBody className="py-3 md:py-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
-              <h2 className="text-lg md:text-xl font-semibold truncate">{lesson.title}</h2>
+              <h2 className="text-lg md:text-xl font-semibold truncate">
+                {lesson.title}
+              </h2>
               <span className="text-sm text-gray-600 flex-shrink-0">
                 {Math.round(progressPercentage)}% Complete
               </span>
             </div>
-            
+
             {/* Progress bar */}
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
-            
+
             {/* Section navigator */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-3">
               <div className="flex space-x-2 overflow-x-auto pb-2 sm:pb-0">
@@ -356,16 +406,28 @@ export function LessonViewer({
                     onClick={() => navigateToSection(index)}
                     className={`
                       w-3 h-3 flex-shrink-0 rounded-full border-2 transition-all duration-200
-                      ${index === currentSectionIndex ? 'border-blue-600 bg-blue-600' : ''}
-                      ${section.isCompleted ? 'bg-green-500 border-green-500' : ''}
-                      ${!section.isCompleted && index !== currentSectionIndex ? 'border-gray-300' : ''}
+                      ${
+                        index === currentSectionIndex
+                          ? "border-blue-600 bg-blue-600"
+                          : ""
+                      }
+                      ${
+                        section.isCompleted
+                          ? "bg-green-500 border-green-500"
+                          : ""
+                      }
+                      ${
+                        !section.isCompleted && index !== currentSectionIndex
+                          ? "border-gray-300"
+                          : ""
+                      }
                     `}
                     title={section.title}
                     aria-label={`Go to ${section.title}`}
                   />
                 ))}
               </div>
-              
+
               <span className="text-sm text-gray-600 flex-shrink-0">
                 Section {currentSectionIndex + 1} of {lessonSections.length}
               </span>
@@ -378,7 +440,9 @@ export function LessonViewer({
       <Card className="min-h-[60vh]">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h3 className="text-lg md:text-xl font-semibold">{currentSection.title}</h3>
+            <h3 className="text-lg md:text-xl font-semibold">
+              {currentSection.title}
+            </h3>
             {currentSection.isCompleted && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 self-start sm:self-center">
                 ✓ Completed
@@ -408,7 +472,7 @@ export function LessonViewer({
                   Est. {lesson.estimatedMinutes} min
                 </span>
               )}
-              
+
               {currentSection.isRequired && (
                 <span className="text-sm text-blue-600 font-medium">
                   Required
@@ -432,14 +496,18 @@ export function LessonViewer({
 }
 
 // Helper function to calculate lesson score
-function calculateLessonScore(lesson: Lesson, progress: LessonProgress): number {
+function calculateLessonScore(
+  lesson: Lesson,
+  progress: LessonProgress
+): number {
   // This would integrate with the mastery calculator
   // For now, return a simple completion-based score
-  const totalSections = (lesson.exercises?.length || 0) + (lesson.assessments?.length || 0);
-  const completedSections = progress.completedSections.filter(id => 
-    id.startsWith('exercise-') || id.startsWith('assessment-')
+  const totalSections =
+    (lesson.exercises?.length || 0) + (lesson.assessments?.length || 0);
+  const completedSections = progress.completedSections.filter(
+    (id) => id.startsWith("exercise-") || id.startsWith("assessment-")
   ).length;
-  
+
   return totalSections > 0 ? (completedSections / totalSections) * 100 : 100;
 }
 
@@ -450,17 +518,25 @@ interface ContentRendererProps {
   isCompleted: boolean;
 }
 
-function ContentRenderer({ content, onComplete, isCompleted }: ContentRendererProps) {
+function ContentRenderer({
+  content,
+  onComplete,
+  isCompleted,
+}: ContentRendererProps) {
   const [hasReadToEnd, setHasReadToEnd] = useState(false);
 
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const element = e.currentTarget;
-    const hasScrolledToEnd = element.scrollTop + element.clientHeight >= element.scrollHeight - 10;
-    
-    if (hasScrolledToEnd && !hasReadToEnd) {
-      setHasReadToEnd(true);
-    }
-  }, [hasReadToEnd]);
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const element = e.currentTarget;
+      const hasScrolledToEnd =
+        element.scrollTop + element.clientHeight >= element.scrollHeight - 10;
+
+      if (hasScrolledToEnd && !hasReadToEnd) {
+        setHasReadToEnd(true);
+      }
+    },
+    [hasReadToEnd]
+  );
 
   useEffect(() => {
     if (hasReadToEnd && !isCompleted) {
@@ -469,12 +545,12 @@ function ContentRenderer({ content, onComplete, isCompleted }: ContentRendererPr
   }, [hasReadToEnd, isCompleted, onComplete]);
 
   return (
-    <div 
+    <div
       className="prose max-w-none max-h-96 overflow-y-auto p-4 border rounded-lg"
       onScroll={handleScroll}
     >
       <div dangerouslySetInnerHTML={{ __html: content }} />
-      
+
       {!isCompleted && hasReadToEnd && (
         <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-green-800 text-sm">
@@ -493,7 +569,11 @@ interface ObjectiveRendererProps {
   isCompleted: boolean;
 }
 
-function ObjectiveRenderer({ objective, onComplete, isCompleted }: ObjectiveRendererProps) {
+function ObjectiveRenderer({
+  objective,
+  onComplete,
+  isCompleted,
+}: ObjectiveRendererProps) {
   const handleMarkUnderstood = useCallback(() => {
     if (!isCompleted) {
       onComplete();
@@ -506,7 +586,8 @@ function ObjectiveRenderer({ objective, onComplete, isCompleted }: ObjectiveRend
         <h4 className="font-semibold text-blue-900 mb-2">Learning Objective</h4>
         <p className="text-blue-800">{objective.description}</p>
         <div className="mt-2 text-sm text-blue-600">
-          Category: {objective.category} | Mastery Threshold: {(objective.masteryThreshold * 100).toFixed(0)}%
+          Category: {objective.category} | Mastery Threshold:{" "}
+          {(objective.masteryThreshold * 100).toFixed(0)}%
         </div>
       </div>
 
@@ -532,7 +613,11 @@ interface ExerciseRendererProps {
   isCompleted: boolean;
 }
 
-function ExerciseRenderer({ exercise, onAnswer, isCompleted }: ExerciseRendererProps) {
+function ExerciseRenderer({
+  exercise,
+  onAnswer,
+  isCompleted,
+}: ExerciseRendererProps) {
   if (!exercise.questions || exercise.questions.length === 0) {
     return <div>No questions available for this exercise.</div>;
   }
@@ -553,7 +638,7 @@ function ExerciseRenderer({ exercise, onAnswer, isCompleted }: ExerciseRendererP
         </div>
       </div>
 
-      <ExerciseQuestionRenderer 
+      <ExerciseQuestionRenderer
         question={question}
         onAnswer={onAnswer}
         disabled={isCompleted}
@@ -569,14 +654,21 @@ interface ExerciseQuestionRendererProps {
   disabled: boolean;
 }
 
-function ExerciseQuestionRenderer({ question, onAnswer, disabled }: ExerciseQuestionRendererProps) {
-  const handleAnswer = useCallback((answer: ExerciseAnswer) => {
-    onAnswer({
-      ...answer,
-      exerciseId: question.exerciseId,
-      questionId: question.id,
-    });
-  }, [question, onAnswer]);
+function ExerciseQuestionRenderer({
+  question,
+  onAnswer,
+  disabled,
+}: ExerciseQuestionRendererProps) {
+  const handleAnswer = useCallback(
+    (answer: ExerciseAnswer) => {
+      onAnswer({
+        ...answer,
+        exerciseId: question.exerciseId,
+        questionId: question.id,
+      });
+    },
+    [question, onAnswer]
+  );
 
   const commonProps = {
     question,
@@ -587,13 +679,13 @@ function ExerciseQuestionRenderer({ question, onAnswer, disabled }: ExerciseQues
   };
 
   switch (question.type) {
-    case 'multiple_choice':
+    case "multiple_choice":
       return <MultipleChoice {...commonProps} />;
-    case 'fill_in_blank':
+    case "fill_in_blank":
       return <FillInTheBlank {...commonProps} />;
-    case 'drag_and_drop':
+    case "drag_and_drop":
       return <DragAndDrop {...commonProps} />;
-    case 'sentence_builder':
+    case "sentence_builder":
       return <SentenceBuilder {...commonProps} />;
     default:
       return <div>Unsupported question type: {question.type}</div>;
@@ -607,26 +699,36 @@ interface AssessmentRendererProps {
   isCompleted: boolean;
 }
 
-function AssessmentRenderer({ assessment, onComplete, isCompleted }: AssessmentRendererProps) {
+function AssessmentRenderer({
+  assessment,
+  onComplete,
+  isCompleted,
+}: AssessmentRendererProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<ExerciseAnswer[]>([]);
 
-  const handleQuestionAnswer = useCallback((answer: ExerciseAnswer) => {
-    const newAnswers = [...answers, answer];
-    setAnswers(newAnswers);
+  const handleQuestionAnswer = useCallback(
+    (answer: ExerciseAnswer) => {
+      const newAnswers = [...answers, answer];
+      setAnswers(newAnswers);
 
-    // Move to next question or complete assessment
-    if (currentQuestionIndex < assessment.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      // Calculate final score
-      const totalPoints = assessment.questions.reduce((sum, q) => sum + q.points, 0);
-      const earnedPoints = newAnswers.reduce((sum, a) => sum + a.points, 0);
-      const score = (earnedPoints / totalPoints) * 100;
-      
-      onComplete(score);
-    }
-  }, [answers, currentQuestionIndex, assessment.questions, onComplete]);
+      // Move to next question or complete assessment
+      if (currentQuestionIndex < assessment.questions.length - 1) {
+        setCurrentQuestionIndex((prev) => prev + 1);
+      } else {
+        // Calculate final score
+        const totalPoints = assessment.questions.reduce(
+          (sum, q) => sum + q.points,
+          0
+        );
+        const earnedPoints = newAnswers.reduce((sum, a) => sum + a.points, 0);
+        const score = (earnedPoints / totalPoints) * 100;
+
+        onComplete(score);
+      }
+    },
+    [answers, currentQuestionIndex, assessment.questions, onComplete]
+  );
 
   if (!assessment.questions || assessment.questions.length === 0) {
     return <div>No questions available for this assessment.</div>;
@@ -637,7 +739,9 @@ function AssessmentRenderer({ assessment, onComplete, isCompleted }: AssessmentR
   return (
     <div className="space-y-4">
       <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-        <h4 className="font-semibold text-purple-900 mb-2">{assessment.title}</h4>
+        <h4 className="font-semibold text-purple-900 mb-2">
+          {assessment.title}
+        </h4>
         {assessment.description && (
           <p className="text-purple-800 text-sm">{assessment.description}</p>
         )}
@@ -649,7 +753,7 @@ function AssessmentRenderer({ assessment, onComplete, isCompleted }: AssessmentR
       </div>
 
       {!isCompleted && (
-        <ExerciseQuestionRenderer 
+        <ExerciseQuestionRenderer
           question={currentQuestion}
           onAnswer={handleQuestionAnswer}
           disabled={false}
